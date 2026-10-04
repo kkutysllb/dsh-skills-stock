@@ -315,6 +315,18 @@ check('disposer 后 skills/sections/工具/通道全部回收', registered.lengt
   check('报告超出 8MB 上限被拒绝', tooBig === true)
   const evilId = (() => { try { reportStore.archive({ title: 'x', content: '<p/>', reportId: '../escape' }); return false } catch (e) { return e.code === 'invalid' } })()
   check('report_id 路径穿越被拒绝', evilId === true)
+  // content_path 文件通道：宿主端直读（大报告不经 LLM 上下文中转的关键口）
+  const w40Dir = join(serviceHome, 'w40')
+  mkdirSync(join(w40Dir, 'reports'), { recursive: true })
+  writeFileSync(join(w40Dir, 'reports', 'weekly.html'), '<html><body>w40 via path</body></html>')
+  const byRel = reportStore.archive({ title: '路径归档·相对', contentPath: 'reports/weekly.html', baseDir: w40Dir })
+  check('content_path 相对路径以 baseDir 解析并落盘', byRel.ok === undefined && readFileSync(String(byRel.content_path), 'utf8').includes('w40 via path'))
+  const byAbs = reportStore.archive({ title: '路径归档·绝对', contentPath: join(w40Dir, 'reports', 'weekly.html') })
+  check('content_path 绝对路径直读', byAbs.size_bytes === Buffer.byteLength('<html><body>w40 via path</body></html>'))
+  const unreadable = (() => { try { reportStore.archive({ title: 'x', contentPath: 'nope/missing.html', baseDir: serviceHome }); return false } catch (e) { return e.code === 'invalid' } })()
+  check('content_path 不可读报 invalid', unreadable === true)
+  const neither = (() => { try { reportStore.archive({ title: 'x' }); return false } catch (e) { return e.code === 'invalid' } })()
+  check('content/content_path 均缺省报 invalid', neither === true)
   const ghostReport = await handleWorkbenchRpc(svc, library, reportStore, 'reports_get', { report_id: 'rpt_nosuchreport' }, signal)
   check('reports_get 未知 id 报 not-found', ghostReport.ok === false && ghostReport.error?.code === 'not-found')
   const evilReportGet = await handleWorkbenchRpc(svc, library, reportStore, 'reports_get', { report_id: '../../etc/passwd' }, signal)
@@ -328,6 +340,11 @@ check('disposer 后 skills/sections/工具/通道全部回收', registered.lengt
   const archiveTool = defs.find((d) => d.name === 'report_archive')
   const archivedViaTool = await archiveTool.execute({ title: '工具直归档', content: '<p>via tool</p>' }, { agent: { session: { id: 'sess_tool' } } })
   check('report_archive 工具可执行并绑定会话线程', archivedViaTool?.ok === true && archivedViaTool.value?.thread_id === 'sess_tool')
+  const archivedViaPath = await archiveTool.execute(
+    { title: '工具直归档·路径', content_path: 'reports/weekly.html' },
+    { agent: { session: { id: 'sess_tool', header: { cwd: join(serviceHome, 'w40') } } } },
+  )
+  check('report_archive 工具 content_path 相对会话 cwd 直读', archivedViaPath?.ok === true && typeof archivedViaPath.value?.content_path === 'string')
   check('工具注册名与 KStock 对齐', ['strategy_list', 'factor_save_version', 'selection_record_run', 'strategy_record_backtest', 'factor_get_latest']
     .every((name) => defs.some((d) => d.name === name)))
   const listTool = defs.find((d) => d.name === 'strategy_list')

@@ -251,12 +251,13 @@ export function reportToolDefs(store: ReportStore): DshToolDefinition[] {
   return [
     {
       name: 'report_archive',
-      description: '把研究报告 HTML 看板归档进报告库（投研工作台「报告库」随时查看）。{title, content, report_id?, symbol?, report_type?, generated_at?, period_start?, period_end?, risk_level?, coverage_status?}：content 传单文件自包含 HTML 全文（≤8MB，配合 html-report 技能渲染器产出）；同一 report_id 重复归档是覆盖更新，不传 report_id 时按会话+标题稳定派生。研究交付即归档——报告库与策略/因子/选股库互补（报告看呈现，三库看版本与运行）。',
+      description: '把研究报告 HTML 看板归档进报告库（投研工作台「报告库」随时查看）。{title, content_path, report_id?, symbol?, report_type?, generated_at?, period_start?, period_end?, risk_level?, coverage_status?}：**大报告一律用 content_path 传看板文件路径**（绝对路径，或相对当前工作目录如 reports/<主题名>.html），宿主端直读文件，禁止先把 HTML 读进上下文再内联传参（几十 KB 单行标记经 LLM 转录必有损坏风险）；content 内联通道仅限小块 HTML。同一 report_id 重复归档是覆盖更新，不传 report_id 时按会话+标题稳定派生。研究交付即归档——报告库与策略/因子/选股库互补（报告看呈现，三库看版本与运行）。',
       parameters: {
         type: 'object',
         properties: {
           title: { type: 'string', description: '报告标题（≤300 字）' },
-          content: { type: 'string', description: '报告 HTML 全文（单文件自包含，≤8MB）' },
+          content_path: { type: 'string', description: '报告 HTML 文件路径（推荐：绝对路径或相对当前工作目录，宿主端直读，不经上下文）' },
+          content: { type: 'string', description: '报告 HTML 全文（仅限小块内容内联；大文件必须走 content_path）' },
           report_id: { type: 'string', description: '报告 id（可选，字母/数字/点/下划线/连字符；缺省按会话+标题派生）' },
           symbol: { type: 'string', description: '标的代码（如 600519.SH，可选）' },
           report_type: { type: 'string', description: '报告类型（analysis/backtest/screening/review 等，默认 analysis）' },
@@ -267,7 +268,7 @@ export function reportToolDefs(store: ReportStore): DshToolDefinition[] {
           coverage_status: { type: 'string', description: '数据覆盖状态（complete/partial 等，默认 complete）' },
           thread_id: { type: 'string', description: '来源会话 id（可选，缺省自动绑定当前会话）' },
         },
-        required: ['title', 'content'],
+        required: ['title'],
       },
       output: { schema: { type: 'object' }, render: jsonRender },
       timeoutMs: 30_000,
@@ -280,7 +281,9 @@ export function reportToolDefs(store: ReportStore): DshToolDefinition[] {
             : caller.sessionId
           const saved = store.archive({
             title: string(body['title'], 'title'),
-            content: string(body['content'], 'content'),
+            content: typeof body['content'] === 'string' ? body['content'] : undefined,
+            contentPath: typeof body['content_path'] === 'string' ? body['content_path'] : undefined,
+            baseDir: caller.cwd,
             reportId: typeof body['report_id'] === 'string' ? body['report_id'] : undefined,
             symbol: typeof body['symbol'] === 'string' ? body['symbol'] : undefined,
             reportType: typeof body['report_type'] === 'string' ? body['report_type'] : undefined,

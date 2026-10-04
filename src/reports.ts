@@ -15,7 +15,7 @@
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
-import { join } from 'node:path'
+import { isAbsolute, join, resolve } from 'node:path'
 import { stockHome } from './stock-home.ts'
 
 /** 单份报告 HTML 的大小上限（KStock MAX_REPORT_BYTES 同量级）。 */
@@ -26,8 +26,13 @@ const SAFE_REPORT_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/
 
 export interface ReportArchiveInput {
   title: string
-  /** 报告 HTML 全文（UTF-8 单文件自包含）。 */
-  content: string
+  /** 报告 HTML 全文（UTF-8 单文件自包含）。与 contentPath 二选一。 */
+  content?: string | undefined
+  /** 报告 HTML 文件路径（绝对，或相对 baseDir 的相对路径）：宿主端直读，
+   * 大报告不经 LLM 上下文中转（几十 KB 单行内联转录必有损坏风险）。 */
+  contentPath?: string | undefined
+  /** 解析相对 contentPath 的基目录（agent 会话工作区 cwd）。 */
+  baseDir?: string | undefined
   reportId?: string | undefined
   symbol?: string | undefined
   reportType?: string | undefined
@@ -99,10 +104,23 @@ export class ReportStore {
     const title = typeof input.title === 'string' ? input.title.trim() : ''
     if (title === '') throw new ReportError('invalid', 'title 必填（报告标题）')
     if (title.length > 300) throw new ReportError('invalid', 'title 过长（≤300 字）')
-    if (typeof input.content !== 'string' || input.content.trim() === '') {
-      throw new ReportError('invalid', 'content 必填（报告 HTML 全文）')
+    let content: string
+    if (typeof input.contentPath === 'string' && input.contentPath.trim() !== '') {
+      // 文件通道：宿主端直读，路径以绝对路径或会话 cwd 相对路径给出
+      const raw = input.contentPath.trim()
+      const full = isAbsolute(raw) ? raw : resolve(input.baseDir ?? '.', raw)
+      try {
+        content = readFileSync(full, 'utf8')
+      } catch {
+        throw new ReportError('invalid', `content_path 无法读取：${full}（确认文件存在，或改传绝对路径）`)
+      }
+    } else if (typeof input.content === 'string' && input.content.trim() !== '') {
+      content = input.content
+    } else {
+      throw new ReportError('invalid', 'content / content_path 必填其一（大报告一律用 content_path 传文件路径，禁止读进上下文内联）')
     }
-    const bytes = Buffer.byteLength(input.content)
+    if (content.trim() === '') throw new ReportError('invalid', '报告内容为空')
+    const bytes = Buffer.byteLength(content)
     if (bytes > MAX_REPORT_BYTES) {
       throw new ReportError('too-large', `content 超出单份报告上限（${bytes} > ${MAX_REPORT_BYTES} 字节）`)
     }
@@ -127,11 +145,11 @@ export class ReportStore {
       risk_level: input.riskLevel ?? existing?.['risk_level'] ?? null,
       coverage_status: input.coverageStatus ?? existing?.['coverage_status'] ?? 'complete',
       size_bytes: bytes,
-      sha256: ReportStore.sha256(input.content),
+      sha256: ReportStore.sha256(content),
       created_at: existing?.['created_at'] ?? now,
       updated_at: now,
     }
-    this.writeFileAtomic(this.contentPath(reportId), input.content)
+    this.writeFileAtomic(this.contentPath(reportId), content)
     this.writeFileAtomic(this.metaPath(reportId), JSON.stringify(meta, null, 2))
     return { ...meta, content_path: this.contentPath(reportId), updated: existing !== undefined }
   }

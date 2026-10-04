@@ -11,7 +11,7 @@ source: KStock vendor/skills（经 dsh-skills-stock 适配，勿在镜像侧直�
 > - 本技能包根即激活提示（skill_resources）给出的资源基目录：正文中的 `scripts/`、`references/`、`../common` 等相对路径以该目录为基准解析；`<本技能包根>` 占位符（多见于 cd 命令）替换为该绝对路径后再执行。
 > - 产物写入**当前工作目录**，并按 scripts/（脚本）/ data/（引擎中间产物）/ reports/（报告 JSON 与 HTML）三目录归位（QiLin 沙箱的工作区/缓存路径语义已按 dsh 语义替换）。
 > - 数据缺失时如实标注「缺失」，**禁止编造数据**。
-> - 本技能渲染器为纯标准库 Python（scripts/render_report.py），无外部依赖；归档一步在 dsh 下改用 report_archive 工具（KStock 桌面端本地 API 的 curl 模板已替换）。
+> - 本技能渲染器为纯标准库 Python（scripts/render_report.py），无外部依赖；归档一步在 dsh 下改用 report_archive 工具的 content_path 文件通道（KStock 桌面端本地 API 的 curl 模板已替换）。
 
 # HTML 报告看板（生成 + 归档）
 
@@ -50,7 +50,7 @@ URL 契约、没有 dark/light 双文件。
 3. **自检**：确认输出无 stderr 告警；文件为单文件 HTML（约 20-200KB），
    可直接 `file "reports/<主题名>.html"` 粗检。
 4. **归档进报告库**（让用户在「投研工作台 → 报告库」随时查看）：
-   调用 `report_archive` 工具归档（投研工作台「报告库」随时查看）：{title, content, symbol?, report_type?, generated_at?, period_start?, period_end?, risk_level?, coverage_status?}，content 传 `reports/<主题名>.html` 全文（≤8MB）。
+   调用 `report_archive` 工具归档（投研工作台「报告库」随时查看）：{title, content_path, symbol?, report_type?, generated_at?, period_start?, period_end?, risk_level?, coverage_status?}，`content_path` 传看板文件路径（如 `reports/<主题名>.html`，相对当前工作目录或绝对路径），宿主端直读文件——**禁止把 HTML 读进上下文再内联传参**。
    归档成功返回 `report_id` 与落盘绝对路径（content_path）。同一 `report_id` 重复
    归档是覆盖更新；不传 `report_id` 时按 thread+标题稳定派生。
    归档后向用户给出文件绝对路径交付 `reports/<主题名>.html`。

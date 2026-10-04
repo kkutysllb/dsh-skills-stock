@@ -125,7 +125,7 @@ const SPEC = [
     whenToUse: '用户要查商品期货/期权合约行情、基差、仓单等基础数据时使用（问财通道）' },
   { dir: 'html-report', name: 'html-report', category: '呈现',
     whenToUse: '需要把完成的研究交付为可视化 HTML 看板并归档报告库时使用（结构化报告 JSON → 纯标准库渲染器 → 单文件自包含 HTML，report_archive 工具归档）；个股/行业/因子/策略/选股等场景报告交付的统一出口',
-    note: '本技能渲染器为纯标准库 Python（scripts/render_report.py），无外部依赖；归档一步在 dsh 下改用 report_archive 工具（KStock 桌面端本地 API 的 curl 模板已替换）。' },
+    note: '本技能渲染器为纯标准库 Python（scripts/render_report.py），无外部依赖；归档一步在 dsh 下改用 report_archive 工具的 content_path 文件通道（KStock 桌面端本地 API 的 curl 模板已替换）。' },
   { dir: 'chart-visualization', name: 'chart-visualization', category: '呈现',
     whenToUse: '需要把数据画成专业图表（26 种：雷达/折线/柱状/饼图/K线/热力等，Node.js 生成 ECharts 单文件 HTML）时使用',
     note: '本技能脚本为 Node.js（scripts/generate.js），需要 Node ≥18 与 npm 安装 echarts，无数据密钥。' },
@@ -284,7 +284,7 @@ const ARCHIVE_TOOL_BLOCKS = {
   selections: `1. \`selection_create\`（{name, criteria}）建选股方案（一句话口径），返回 \`selection_id\`；
 2. \`selection_save_version\`（{selection_id, criteria_json, change_note, parent_version}）存口径版本：criteria_json.summary 必填；
 3. \`selection_record_run\`（{selection_id, version, trade_date, universe, rules, metrics, report?, picks?}）存执行结果：picks=[{code,name,score,strategies,rank}]（code 带交易所后缀），report=报告全文。`,
-  reports: `调用 \`report_archive\` 工具归档（投研工作台「报告库」随时查看）：{title, content, symbol?, report_type?, generated_at?, period_start?, period_end?, risk_level?, coverage_status?}，content 传 \`reports/<主题名>.html\` 全文（≤8MB）。`,
+  reports: `调用 \`report_archive\` 工具归档（投研工作台「报告库」随时查看）：{title, content_path, symbol?, report_type?, generated_at?, period_start?, period_end?, risk_level?, coverage_status?}，\`content_path\` 传看板文件路径（如 \`reports/<主题名>.html\`，相对当前工作目录或绝对路径），宿主端直读文件——**禁止把 HTML 读进上下文再内联传参**。`,
 }
 
 function rewriteArchiveBlocks(body) {
