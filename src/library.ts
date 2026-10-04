@@ -188,11 +188,13 @@ export class LibraryStore {
       if (object === undefined) continue
       const runs = this.listRuns(kind, entry)
       const latest = runs.length > 0 ? runs[runs.length - 1] : undefined
+      // 宿主 ToolRuntime 对工具返回值做 lossless JSON 校验（undefined 值属性
+      // 即拒收）——无运行的资产不产 latest_run 键，而非置 undefined。
       out.push({
         ...object,
         object_id: entry,
         library: kind,
-        latest_run: latest === undefined ? undefined : lightRun(latest),
+        ...(latest === undefined ? {} : { latest_run: lightRun(latest) }),
         run_count: runs.length,
       })
     }

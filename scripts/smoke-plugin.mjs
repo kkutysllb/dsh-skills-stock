@@ -362,6 +362,24 @@ check('disposer 后 skills/sections/工具/通道全部回收', registered.lengt
     { agent: { session: { id: 'sess_tool', header: { cwd: join(serviceHome, 'w40') } } } },
   )
   check('report_archive 工具 content_path 相对会话 cwd 直读', archivedViaPath?.ok === true && typeof archivedViaPath.value?.content_path === 'string')
+  // 宿主 ToolRuntime 契约回归：成功返回必须 lossless（undefined 值属性即被
+  // ToolOutputError 拒收）且 render 必须产出 ContentBlock 部件数组（裸 string
+  // 部件会被模型侧静默丢弃——v1.3.0「工具无返回」事故的根因）
+  const sampleExec = { agent: { session: { id: 's', header: { cwd: serviceHome } } } }
+  const contractProbes = [
+    [defs.find((d) => d.name === 'strategy_list'), {}],
+    [defs.find((d) => d.name === 'report_list'), {}],
+    [defs.find((d) => d.name === 'report_get'), { report_id: 'rpt_nope' }],
+  ]
+  let contractOk = true
+  for (const [def, args] of contractProbes) {
+    const result = await def.execute(args, sampleExec)
+    const lossless = JSON.stringify(result) === JSON.stringify(JSON.parse(JSON.stringify(result)))
+    const blocks = def.output.render(args, result)
+    const shaped = Array.isArray(blocks) && blocks.every((b) => b && typeof b === 'object' && b.type === 'text' && typeof b.text === 'string')
+    if (!lossless || !shaped) contractOk = false
+  }
+  check('工具输出满足宿主契约（lossless 返回 + ContentBlock 部件形状）', contractOk)
   check('工具注册名与 KStock 对齐', ['strategy_list', 'factor_save_version', 'selection_record_run', 'strategy_record_backtest', 'factor_get_latest']
     .every((name) => defs.some((d) => d.name === name)))
   const listTool = defs.find((d) => d.name === 'strategy_list')

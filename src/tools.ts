@@ -35,8 +35,16 @@ export function callerFrom(exec: unknown): ToolCaller {
   }
 }
 
-const jsonRender = (_args: unknown, value: unknown): string[] => [
-  typeof value === 'string' ? value : JSON.stringify(value, null, 2),
+/** 模型可见的工具输出部件（宿主 ToolRuntime 契约，官方 schedule 插件同款）：
+ * render 必须返回 ContentBlock 部件对象数组——返回裸 string 会被宿主原样
+ * 塞进 tool 消息的 content，模型侧消息规范化时静默丢弃（表现为「工具无返回」）。 */
+export interface ToolContentBlock {
+  readonly type: 'text'
+  readonly text: string
+}
+
+const jsonRender = (_args: unknown, value: unknown): ToolContentBlock[] => [
+  { type: 'text', text: typeof value === 'string' ? value : JSON.stringify(value, null, 2) },
 ]
 
 function toolEnvelope(error: unknown): { ok: false; error: { code: string; message: string } } {
@@ -71,7 +79,7 @@ export interface DshToolDefinition {
   readonly name: string
   readonly description: string
   readonly parameters: Record<string, unknown>
-  readonly output: { readonly schema: Record<string, unknown>; readonly render: (args: unknown, value: unknown) => string[] }
+  readonly output: { readonly schema: Record<string, unknown>; readonly render: (args: unknown, value: unknown) => ToolContentBlock[] }
   readonly timeoutMs: number
   readonly execute: (args: unknown, exec: unknown) => Promise<unknown>
 }

@@ -162,7 +162,7 @@ export class ReportStore {
       if (entry.startsWith('.')) continue
       const meta = this.readMeta(entry)
       if (meta === undefined) continue
-      out.push({ ...meta, content_path: undefined })
+      out.push({ ...meta }) // 不投影 content_path 键（lossless 校验拒绝 undefined 值属性）
     }
     out.sort((a, b) => String(b['updated_at']).localeCompare(String(a['updated_at'])))
     return out
