@@ -14,10 +14,14 @@ export function userHome(): string {
 }
 
 /** 宿主主目录解析（零依赖复刻宿主 home-paths 优先级）：
- * `$QILIN_HOME`（非空白）→ `$DSH_HOME`（非空白）→ `~/.dsh`。 */
+ * `$QILIN_HOME`（非空白）→ `$DSH_HOME`（非空白）→ `~/.dsh`。
+ * 空白视为未设置并继续向下解析（与 common 缓存补丁的 or 链语义一致）。 */
 export function harnessHome(): string {
-  const fromEnv = process.env.QILIN_HOME ?? process.env.DSH_HOME
-  return fromEnv !== undefined && fromEnv.trim() !== '' ? fromEnv : join(userHome(), '.dsh')
+  const qilin = process.env.QILIN_HOME?.trim()
+  if (qilin !== undefined && qilin !== '') return qilin
+  const dsh = process.env.DSH_HOME?.trim()
+  if (dsh !== undefined && dsh !== '') return dsh
+  return join(userHome(), '.dsh')
 }
 
 /** 插件数据根：<宿主 home>/dsh-skills-stock（secrets.env / product / cache 都在其下）。 */

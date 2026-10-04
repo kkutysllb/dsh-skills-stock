@@ -47,6 +47,12 @@ check('dsh.bundle.patch 指向存在的 cordis.patch.yml', pkg.dsh?.bundle?.patc
 check('main 入口 lib/index.js 存在（构建产物随仓提交）', pkg.main === './lib/index.js' && existsSync(join(packageRoot, 'lib', 'index.js')))
 check('exports ./client → lib/client.js 存在', pkg.exports?.['./client'] === './lib/client.js' && existsSync(join(packageRoot, 'lib', 'client.js')))
 check('dsh.client 声明 platform=web 与 inject 列表', pkg.dsh?.client?.platform === 'web' && Array.isArray(pkg.dsh?.client?.inject) && pkg.dsh.client.inject.length >= 3)
+// 双通道（dsh + 麒麟/qilin）：两通道必须指向同一份 patch 与同一 client 交付物
+check('qilin.bundle.patch 与 dsh 通道同源（同一 cordis.patch.yml）',
+  pkg.qilin?.bundle?.patch === pkg.dsh?.bundle?.patch && pkg.qilin?.bundle?.patch === './cordis.patch.yml')
+check('qilin.client 与 dsh.client 同平台同 inject（同一 client 交付物）',
+  pkg.qilin?.client?.platform === pkg.dsh?.client?.platform && pkg.qilin?.client?.platform === 'web'
+  && JSON.stringify(pkg.qilin?.client?.inject) === JSON.stringify(pkg.dsh?.client?.inject))
 
 for (const need of ['lib', 'skills', 'cordis.patch.yml', 'README.md', 'LICENSE']) {
   check(`files 白名单含 ${need}`, Array.isArray(pkg.files) && pkg.files.includes(need))
@@ -240,6 +246,17 @@ check('disposer 后 skills/sections/工具/通道全部回收', registered.lengt
       && readFileSync(expectedSecrets, 'utf8').includes('dsh-home-tok'))
     const obj = lib2.createObject('strategies', { name: 'DSH_HOME 库位' })
     check('三库存储落在 $DSH_HOME/dsh-skills-stock/product', existsSync(join(dshHomeDir, 'dsh-skills-stock', 'product', 'strategies', obj.object_id, 'object.json')))
+    // 麒麟通道：$QILIN_HOME 优先于 $DSH_HOME；空白 QILIN_HOME 视为未设置
+    const qilinHomeDir = join(serviceHome, 'qilin-home')
+    process.env.QILIN_HOME = qilinHomeDir
+    const stQ = await handleWorkbenchRpc(svc2, lib2, reportStore, 'status', {}, signal)
+    check('status.stockHome 跟随 $QILIN_HOME（优先于 $DSH_HOME，麒麟语义）',
+      stQ.ok === true && stQ.value?.stockHome === join(qilinHomeDir, 'dsh-skills-stock'))
+    process.env.QILIN_HOME = ''
+    const stEmpty = await handleWorkbenchRpc(svc2, lib2, reportStore, 'status', {}, signal)
+    check('空白 $QILIN_HOME 视为未设置，回落 $DSH_HOME（与缓存补丁 or 链同语义）',
+      stEmpty.ok === true && stEmpty.value?.stockHome === join(dshHomeDir, 'dsh-skills-stock'))
+    delete process.env.QILIN_HOME
   } finally {
     delete process.env.DSH_HOME
   }

@@ -83,6 +83,28 @@ KStock 2.0 的变化：
 - [x] 工作台四 tab；报告库列表/内嵌 iframe 预览（sandbox 全关）/blob 新窗口打开，构建产物 lib/client.js 含 reports_list/reports_get 与 kss-report-frame。
 - [x] `npm run check`（tsc + esbuild）与 `npm run smoke`（369 项 PASS / 0 FAIL）全绿；版本 1.3.0，README/patch 头注释四库口径。
 
+## 4.1 实施期修正记录（与原设计的差异，均为验证驱动）
+
+1. **报告归档断链修正（实测驱动，commit bd78b60）**：真实任务中 agent 交付了
+   55KB 单行压缩 HTML 看板但拒绝调用 report_archive——工具原设计只收
+   `content` 内联全文，LLM 逐字转录必有损坏风险（bash 不能调工具、read 工具
+   给带行号转写）。已增 `content_path` 文件通道（宿主端直读，绝对路径或相对
+   会话 cwd），`content` 保留给小块内容；技能正文/场景手册/通告同步口径。
+2. **错误类型**：B1 原文「错误复用 LibraryError」，实现为同构 `ReportError`
+   （tools/RPC 信封同样映射 code/message，避免存储模块间循环依赖）。
+3. **双通道边界修复（设计核查驱动）**：`harnessHome()` 原实现 `QILIN_HOME ??
+   DSH_HOME` 在「QILIN_HOME 设为空白 + DSH_HOME 有效」时会跳过 DSH_HOME
+   直落 ~/.dsh，与 docstring 及 common 缓存补丁的 or 链语义不一致；已改为
+   空白视为未设置并继续向下解析，冒烟固化（优先级 + 空白回落两项断言）。
+
+## 4.2 双通道确认（dsh + 麒麟）
+
+manifest 两通道同源：`dsh.bundle.patch` 与 `qilin.bundle.patch` 指向同一份
+`./cordis.patch.yml`，`dsh.client` 与 `qilin.client` 同平台（web）同 inject
+（6 项）——即同一交付物，行为完全一致；数据根解析 `$QILIN_HOME →
+$DSH_HOME → ~/.dsh`（含空白回落）由冒烟两项断言固化。qilin CLI 本机未装，
+无法做端到端麒麟安装验证；结构对账 + 冒烟断言为当前可执行的最高确认强度。
+
 ## 5. 发版待办（不在本次代码修改范围）
 
 - `npm run sync:mirror` 同步 dsh-plugins 镜像仓并在对方仓提交推送（发版约定，涉及第二仓库的对外推送，留发布时执行）。
