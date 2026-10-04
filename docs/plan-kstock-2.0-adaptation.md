@@ -1,6 +1,7 @@
 # KStock 2.0 适配升级实施计划（v1.2.2 → v1.3.0）
 
-> 状态：实施中 ｜ 基线：v1.2.2 快照已提交（31b6999）
+> 状态：✅ 已实施（v1.3.0）｜ 基线：v1.2.2 快照（31b6999）→ 计划（36f5fd1）→
+> 上游重适配（3caca0e）→ 四库实现（6f3c96e）
 > 上游：KStock 2.0.0-rc.2（用户口径）/ 本地仓 2.0.0-rc.3（vendor/skills @ 84d2d1ae）
 > 决策记录：**报告库走 agent 工具通道**（与三库同构的 `report_*` 工具），
 > 不做「curl 到插件 RPC」形态——dsh 的 RPC 是浏览器→宿主通道，agent 的
@@ -73,11 +74,16 @@ KStock 2.0 的变化：
 - `report_delete` 工具与工作台删除按钮暂缓（KStock 有删除标记语义，v1.3 先收口归档/查看/对比主链路）。
 - 工作台报告详情不做全文搜索/标签筛选（KStock 桌面端也未提供）。
 
-## 4. 验收清单
+## 4. 验收清单（实施结果）
 
-- [ ] `npm run adapt` 对 rc.3 上游全量重跑成功，残留检查全绿（含新增 8 条模式）。
-- [ ] stock-analysis 19 文件、common 2 文件与上游一致（除白名单补丁点）。
-- [ ] skills/ 含 41 个技能目录 + manifest；html-report 正文无 curl/present/18001 残留；场景手册归档节为工具调用三步。
-- [ ] 18 个 agent 工具注册；report_archive 归档 → 工作台 reports_list 可见 → reports_get 取回 HTML 全文；同 id 覆盖、8MB/非法 id/穿越拒绝。
-- [ ] 工作台四 tab；报告库列表/内嵌预览可用（构建产物 lib/client.js 含 reports 端点调用）。
-- [ ] `npm run check && npm run smoke` 0 失败；CHANGELOG 性质的说明落在 README 版本段。
+- [x] `npm run adapt` 对 rc.3 上游全量重跑成功，残留检查全绿（新增 7 条模式），幂等复跑零差异。
+- [x] stock-analysis 19 文件、common 2 文件与上游一致（除白名单补丁点，漂移复检逐技能归零）。
+- [x] skills/ 含 41 个技能目录 + manifest；html-report 正文无 curl/present/18001 残留；场景手册归档节为工具调用三步。
+- [x] 18 个 agent 工具注册；report_archive 归档 → reports_list 可见 → reports_get 取回 HTML 全文；同 id 覆盖（sha256 刷新/updated 标记）、8MB 拒绝、report_id 白名单拒绝穿越，均入冒烟断言。
+- [x] 工作台四 tab；报告库列表/内嵌 iframe 预览（sandbox 全关）/blob 新窗口打开，构建产物 lib/client.js 含 reports_list/reports_get 与 kss-report-frame。
+- [x] `npm run check`（tsc + esbuild）与 `npm run smoke`（369 项 PASS / 0 FAIL）全绿；版本 1.3.0，README/patch 头注释四库口径。
+
+## 5. 发版待办（不在本次代码修改范围）
+
+- `npm run sync:mirror` 同步 dsh-plugins 镜像仓并在对方仓提交推送（发版约定，涉及第二仓库的对外推送，留发布时执行）。
+- npm 发布 / GitHub tag v1.3.0。
