@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "common"
+version = "1.0.0"
+description = "kk_Skills 公共库——iWencai/Tushare 统一客户端与金融分析格式化工具集"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=1.5",
+    "python-dotenv>=1.0",
+    "tushare>=1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

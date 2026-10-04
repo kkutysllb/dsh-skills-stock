@@ -1,0 +1,9 @@
+# stock-analysis 运行时依赖
+# 注：
+#   - chan_theory_v2 为技能包内嵌缠论引擎（chan_theory_v2/），无需安装
+#   - kk_common 为独立技能包 stock/common/ 的数据网关，需安装该技能
+#   - tushare 通过 kk_common 网关访问，部分脚本直接依赖（urllib 直连场景）
+numpy
+pandas
+python-dotenv
+tushare

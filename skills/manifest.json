@@ -1,0 +1,296 @@
+{
+  "skills": [
+    {
+      "dir": "stock-analysis",
+      "name": "stock-analysis",
+      "description": "A股个股十四维一体深度分析引擎——技术面+财务面+财报深度解读+筹码面+估值面+多模型估值+股本股东+事件统计+消息/机构/资讯层+实时行情+经营数据穿透+缠论分析+艾略特波浪+谐波形态+社交媒体情绪分析，附10大智能选股策略。开箱即用的跨平台技能包，支持 OpenClaw/Claude Code/Qoder 等 Agent 架构。",
+      "whenToUse": "用户要深度分析某只 A 股个股（技术面/财务面/财报解读/筹码/估值/缠论/波浪/谐波/舆情/股东任一维度）、出个股研报、或问某股票值不值得买时使用；十四维一体分析引擎",
+      "category": "个股研究",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN",
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "financial-statement",
+      "name": "financial-statement",
+      "description": "财务三大报表深度解读框架，涵盖三表勾稽关系、盈利质量（应计与现金流）分析、杜邦拆解，以及 10 余项财务造假红旗指标。",
+      "whenToUse": "用户要解读三大报表、盈利质量评分、财务造假红旗检测、杜邦分析时使用",
+      "category": "个股研究",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN"
+      ]
+    },
+    {
+      "dir": "earnings-forecast",
+      "name": "earnings-forecast",
+      "description": "盈利预测与一致预期分析框架，涵盖自上而下、自下而上预测方法、SUE、PEAD 与分析师预期修正，用于捕捉业绩超预期交易机会。",
+      "whenToUse": "用户要券商盈利预测数据（EPS/净利润一致预期、评级分布、目标价）或盈利超预期（SUE/PEAD）分析时使用",
+      "category": "个股研究",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "earnings-revision",
+      "name": "earnings-revision",
+      "description": "盈利预期修正、管理层指引分析与财报后漂移研究框架，用于跟踪分析师一致预期变化、业绩意外模式，以及管理层指引转向，适用于美股与港股。",
+      "whenToUse": "用户要分析盈利预期修正、业绩指引变化、分析师上调/下调动向时使用",
+      "category": "个股研究",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "valuation-model",
+      "name": "valuation-model",
+      "description": "估值方法论，涵盖 DCF、DDM、SOTP 等绝对估值，以及 PE-Band、PB-ROE、EV-EBITDA 等相对估值，并包含敏感性分析与估值陷阱识别。",
+      "whenToUse": "用户要相对估值分析（PE-Band、PB-ROE、历史分位、多模型交叉验证）或估值陷阱检测时使用",
+      "category": "个股研究",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN"
+      ]
+    },
+    {
+      "dir": "dcf",
+      "name": "dcf",
+      "description": "用于搭建真实的 DCF 估值模型，获取 SEC 申报和分析师资料中的财务数据，构建现金流预测、WACC 计算和敏感性分析，并输出专业 Excel 模型与摘要。适用于内在价值评估和详细财务建模场景。",
+      "whenToUse": "用户要对公司做 DCF 绝对估值建模（含 Excel 模型输出）时使用",
+      "category": "个股研究",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "selection-strategies",
+      "name": "selection-strategies",
+      "description": "A股多策略选股运行框架，提供10种经典选股策略的CLI运行脚本，涵盖成长股、价值投资、高股息、动量突破、技术突破、超跌反弹、涨停龙头、主力资金追踪、缠论背驰选股与多因子横截面。每种策略独立运行、可配置参数，支持市值/股票池过滤与结果导出。",
+      "whenToUse": "用户要按既定选股策略跑批（价值投资/高股息/成长股/动量突破/技术突破/超跌反弹/涨停龙头/资金追踪/缠论背驰/多因子横截面十大策略）时使用",
+      "category": "选股与策略",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN"
+      ]
+    },
+    {
+      "dir": "a-stock-screener",
+      "name": "a-stock-screener",
+      "description": " A 股对话式选股助手 (Orchestrator Pattern) —— 用户用自然语言描述\"想要什么样的股票\"， 本 skill 解析意图 → 选择策略 → 拉取数据 → 套用过滤 → 多因子打分 → 输出选股报告。 内置 10 种经典选股策略（价值/高股息/成长/动量/技术突破/超跌反弹/涨停龙头/机构资金追踪/ 缠论背驰/多因子横截面），工作流五阶段编排，支持无网络 mock 模式离线运行。 适用于 stock-analysis / factor-research / selection-strategies / data-fetch 等 skill 的上层\"选股入口\"场景。",
+      "whenToUse": "用户用自然语言描述选股条件（如「低估值高股息、市值 100-300 亿、ROE 大于 15」）要一批候选股票时使用；对话式选股编排器",
+      "category": "选股与策略",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN",
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "factor-research",
+      "name": "factor-research",
+      "description": "量化因子研究公共技能包——整合因子方法论、IC/IR分析引擎、分层回测、基本面筛选、多因子选股和小盘成长股挖掘，覆盖因子定义→有效性检验→组合构建→选股应用全链路，开箱即用的跨平台技能包。",
+      "whenToUse": "用户要做因子研究（IC/IR 分析、分层回测、因子合成、六因子选股）时使用",
+      "category": "选股与策略",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "strategy-research",
+      "name": "strategy-research",
+      "description": "量化策略研究公共技能包——策略设计/编码/回测/评估全链路，支持A股/港股/美股/加密货币多市场，内置3种经典策略模板（双均线/RSI/MACD），SignalEngine合约规范，config.json标准配置，策略评审标准，开箱即用。",
+      "whenToUse": "用户要设计、开发或回测量化策略（内置策略模板、参数网格扫描、walk-forward 滚动回测）时使用",
+      "category": "选股与策略",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN"
+      ]
+    },
+    {
+      "dir": "backtrader-strategies",
+      "name": "backtrader-strategies",
+      "description": "量化选股策略适配器库——封装价值投资、成长股、动量突破、高股息、技术突破、超跌反弹、连板龙头、融资追踪 8 大策略的选股逻辑，从 API 层分离核心算法。被 selection-strategies 等技能引用。当需要实现批量量化选股、多策略组合筛选、策略回测适配时使用此技能。",
+      "whenToUse": "backtrader 回测执行时被 strategy-research 等技能引用的 8 策略适配器库；用户明确要这 8 个适配策略（动量突破/资金追踪/高股息/价值投资等）的回测实现细节时使用",
+      "category": "选股与策略",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN"
+      ]
+    },
+    {
+      "dir": "cb-analysis",
+      "name": "cb-analysis",
+      "description": "可转债全链路分析技能包——筛选+分析+看板+周度+Tushare数据层五引擎一体化。覆盖16大看板模块（强赎/下修/龙虎榜/配债安全垫/妖债监控等）、六维度深度分析（基本指标/正股联动/债底保护/时间价值/资金面/套利信号）、智能自然语言筛选；周度引擎按 ISO 自然周聚合全市场存续转债——市场温度/规模与结构/估值全景/资金与情绪/双低策略池/综合研判（0-100分）；Tushare 数据层（cb_data.py）封装 8 个可转债接口 + 3 个聚合命令（个券全维度档案 profile / 条款时间线 terms / 到期收益率 ytm）。日度问财基于同花顺 OpenAPI（Python3 标准库零依赖），周度+数据层基于 Tushare Pro。",
+      "whenToUse": "用户要分析可转债（转债行情、转股溢价率、双低策略、强赎/下修、六维分析、周度引擎）时使用",
+      "category": "品种专项",
+      "requiredSecrets": [
+        "IWENCAI_API_KEY",
+        "TUSHARE_TOKEN"
+      ]
+    },
+    {
+      "dir": "etf-analysis",
+      "name": "etf-analysis",
+      "description": "ETF全维度分析技能包——双引擎驱动（Tushare Pro 量化数据层 + 问财实时筛选层），支持13项ETF分析维度（列表/行情/净值/份额/规模/五类分类/跟踪指数/行业ETF/横向对比/持仓/经理/分红）和自然语言智能筛选，开箱即用的跨平台技能包。",
+      "whenToUse": "用户要分析或筛选 ETF（13 维分析、费率/规模/流动性筛选器）时使用",
+      "category": "品种专项",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN",
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "futures-analysis",
+      "name": "futures-analysis",
+      "description": "A股股指期货四维一体深度分析引擎——行情趋势（K线/均线/OI）+贴升水分析（基差/期限结构/市场情绪）+机构持仓（前20席位多空/中信风向标/中信vs其他机构多空单持仓及每日每周操作变化对比）+综合研判（100分评分/品种分化/策略建议），开箱即用的跨平台技能包。",
+      "whenToUse": "用户要分析股指期货（IF/IH/IC/IM 行情、基差、持仓、成交结构）时使用",
+      "category": "品种专项",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN"
+      ]
+    },
+    {
+      "dir": "option-futures-linkage",
+      "name": "option-futures-linkage",
+      "description": "期指期权联动分析引擎——以沪深300/上证50/中证500/中证1000四大期指为轴，联动其对应期权（SSE 300ETF/50ETF/500ETF期权 + CFFEX MO中证1000股指期权）的认沽认购（成交量/持仓量PCR）、波动率（ATM IV/加权IV，BS反解）、IV斜率（认沽/认购端回归、Risk Reversal）、认沽认购IV差等期权维度与期指趋势/基差/持仓维度做5维联动信号分析（共振/背离），输出日粒度/周粒度双粒度联动报告与分品种评分。",
+      "whenToUse": "用户要股指期货与期权联动分析（五个维度联动信号）时使用",
+      "category": "品种专项",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN"
+      ]
+    },
+    {
+      "dir": "options-payoff",
+      "name": "options-payoff",
+      "description": "期权盈亏分析引擎——Black-Scholes 定价、Greeks 计算、多腿策略盈亏图、盈亏平衡点、隐含波动率反解、波动率情景分析，开箱即用的跨平台技能包。",
+      "whenToUse": "用户要期权定价（BS 模型/Greeks）、多腿组合到期盈亏结构计算时使用；纯本地计算无需外部数据",
+      "category": "品种专项",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "options-volatility",
+      "name": "options-volatility",
+      "description": "期权波动率分析引擎——隐含波动率/实现波动率计算、波动率曲面分析、IV-RV对比、波动率交易策略评估，开箱即用的跨平台技能包。",
+      "whenToUse": "用户要波动率曲面、隐含/历史波动率比较、波动率交易信号分析时使用；纯本地计算",
+      "category": "品种专项",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "market-linkage-engine",
+      "name": "market-linkage-engine",
+      "description": " A 股市场联动分析引擎。独立、可复用的多维度资金与情绪联动分析工具，覆盖 8 大维度： 主力资金流向、北向资金流向、两融趋势、股指期货基差、7 大期权 ETF 波动率、 9 大宽基 ETF 份额变化、Shibor 利率走势、龙虎榜分析。 数据源：Tushare Pro API + 同花顺问财 OpenAPI。 输出：日度/周度联动报告 + 综合情绪评分 + 一句话市场总结。",
+      "whenToUse": "用户要市场全景体检（股/债/汇/商品/流动性等 8 维联动评分，日度/周度）时使用",
+      "category": "市场全景",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN",
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "industry-analysis",
+      "name": "industry-analysis",
+      "description": "A股行业六维一体深度分析引擎——结构层（产业链上中下游拆解）+数据层（行业估值/财务/盈利排名）+框架层（五模块产业链解读）+研究层（券商研报）+资讯层（实时财经资讯）+宏观框架层（全球宏观周期定位），开箱即用的跨平台技能包。",
+      "whenToUse": "用户要行业层面研究（行业画像、估值排名、产业链图谱、景气度、投研观点）时使用",
+      "category": "市场全景",
+      "requiredSecrets": [
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "tushare-data",
+      "name": "tushare-data",
+      "description": "Tushare 官方数据适配技能——A 股/指数/ETF/基金/期货/期权/财务/估值/资金流/宏观全量数据获取的唯一官方入口，分析类技能必须通过本技能或 common.finance_data_gateway 间接调用，禁止直接 import tushare",
+      "whenToUse": "需要从 Tushare Pro 取结构化数据（行情/基本面/估值/资金流/宏观五类）且已知接口名时使用；官方数据适配层，唯一直连 Tushare 的位置",
+      "category": "数据查询",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN"
+      ]
+    },
+    {
+      "dir": "zhishu-query",
+      "name": "zhishu-query",
+      "description": "查询上证指数、沪深300、创业板指、恒生指数、纳斯达克指数等指数行情数据，支持涨跌幅、成交量、点位等指标查询，返回相关指数数据结果。当用户询问指数数据、上证指数、沪深300、创业板指、恒生指数、纳斯达克指数、指数行情、指数涨跌幅、指数点位等问题时，必须使用此技能。",
+      "whenToUse": "用户要查指数数据（行情、成分股、指数估值）时使用（问财通道）",
+      "category": "数据查询",
+      "requiredSecrets": [
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "announcement-search",
+      "name": "announcement-search",
+      "description": "支持A股、港股、基金、ETF等金融标的公告的查询，同时公告类型包括不限于定期财务报告、分红派息、回购增持、资产重组等等。",
+      "whenToUse": "用户要查上市公司公告（原文检索、公告类型筛选）时使用（问财通道）",
+      "category": "数据查询",
+      "requiredSecrets": [
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "news-search",
+      "name": "news-search",
+      "description": "财经领域为主的资讯搜索引擎，囊获了各类型媒体：官媒、主流财经媒体、垂直行业网站、知名上市公司/非上市公司官网等，可以帮助你了解最新财经事件、政策动态、行业革新、企业业务进展等等。",
+      "whenToUse": "用户要查财经新闻、个股舆情、市场资讯时使用（问财通道）",
+      "category": "数据查询",
+      "requiredSecrets": [
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "report-search",
+      "name": "report-search",
+      "description": "收录了主流投研机构发布的研究报告，帮你快速获取专业、深度的分析逻辑、投资评级、目标价等重要投研决策信息。",
+      "whenToUse": "用户要查券商研报（观点、评级、盈利预测汇总）时使用（问财通道）",
+      "category": "数据查询",
+      "requiredSecrets": [
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "business-query",
+      "name": "business-query",
+      "description": "查询主营业务构成、主要客户、供应商、参控股公司、股权投资、重大合同等经营相关数据，支持自然语言问句输入，返回相关经营数据结果。当用户询问主营业务构成、主要客户、供应商信息、参控股公司、股权投资、重大合同等经营数据查询问题时，必须使用此技能。",
+      "whenToUse": "用户要查公司经营数据（主营构成、客户/供应商、参控股公司、重大合同）时使用（问财通道）",
+      "category": "数据查询",
+      "requiredSecrets": [
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "macro-query",
+      "name": "macro-query",
+      "description": "查询 GDP、CPI、PPI、利率、汇率、社融等宏观经济指标，支持自然语言问句输入，返回相关宏观经济数据结果。当用户询问宏观经济数据、GDP、CPI、PPI、利率、汇率、社融、M2、PMI、工业增加值、消费、投资、进出口等宏观经济指标查询问题时，必须使用此技能。",
+      "whenToUse": "用户要查宏观数据（GDP/CPI/PMI/社融/利率/汇率等）时使用（问财通道）",
+      "category": "数据查询",
+      "requiredSecrets": [
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "event-query",
+      "name": "event-query",
+      "description": "查询个股业绩预告、增发、质押、解禁、调研、监管函等事件数据，支持自然语言问句输入，返回相关事件数据结果。当用户询问业绩预告、增发配股、股权质押、限售解禁、机构调研、监管函等事件数据查询问题时，必须使用此技能。",
+      "whenToUse": "用户要查市场或公司事件（增减持、质押、回购、并购重组、解禁等）时使用（问财通道）",
+      "category": "数据查询",
+      "requiredSecrets": [
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "hithink-futures",
+      "name": "hithink-futures",
+      "description": "问财期货期权数据查询——支持期货行情、期权波动率、产销数据、会员持仓、会员榜单、行权数据的自然语言查询，基于同花顺问财 OpenAPI，开箱即用的跨平台技能包。",
+      "whenToUse": "用户要查商品期货/期权合约行情、基差、仓单等基础数据时使用（问财通道）",
+      "category": "数据查询",
+      "requiredSecrets": [
+        "IWENCAI_API_KEY"
+      ]
+    },
+    {
+      "dir": "chart-visualization",
+      "name": "chart-visualization",
+      "description": "数据可视化技能，支持26种图表类型，智能选择最佳图表，通过JavaScript脚本生成图表图片。",
+      "whenToUse": "需要把数据画成专业图表（26 种：雷达/折线/柱状/饼图/K线/热力等，Node.js 生成 ECharts 单文件 HTML）时使用",
+      "category": "呈现",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "common",
+      "name": "common",
+      "description": "kk_Skills 公共库——金融数据网关（FinanceDataGateway）+ iWencai/Tushare 统一客户端 + 金融分析格式化工具集；分析技能必须通过 get_finance_data_gateway() 访问 Tushare，禁止直接 import tushare",
+      "whenToUse": "kk_common 公共数据网关库（finance_data_gateway/tushare_client/iwencai_client/缓存/格式化），是其他分析技能脚本运行的前置依赖，一般不单独触发；排查数据网关、Tushare/问财客户端问题时使用",
+      "category": "基础设施",
+      "requiredSecrets": [
+        "TUSHARE_TOKEN",
+        "IWENCAI_API_KEY"
+      ]
+    }
+  ]
+}

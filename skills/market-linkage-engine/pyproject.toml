@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "market-linkage-engine"
+version = "1.0.0"
+description = "A 股市场联动分析引擎 — 8 大维度（主力/北向/两融/期指基差/期权ETF波动率/宽基ETF份额/Shibor/龙虎榜）"
+authors = [{name = "kk-quant"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "pandas>=2.0.0",
+    "tabulate>=0.9.0",
+    "tushare>=1.4.2",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+linkage = "market_linkage_engine.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

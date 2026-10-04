@@ -1,0 +1,103 @@
+{
+  "name": "dsh-skills-stock",
+  "version": "1.2.2",
+  "description": "DSH 原生 A 股量化投研技能包：适配自 KStock 桌面端精选技能体系（30 个技能：个股研究 / 选股与策略 / 品种专项 / 市场全景 / 数据查询 / 图表呈现），激活即注册为 runtime skill，配 workspace 侧边栏「投研工作台」（数据源凭据配置 + 技能库）。",
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "skills",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-api-session-controller",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-api-remotes"
+      ]
+    }
+  },
+  "qilin": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-api-session-controller",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-api-remotes"
+      ]
+    }
+  },
+  "scripts": {
+    "adapt": "node scripts/adapt-kstock-skills.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "node scripts/build.mjs",
+    "check": "npm run typecheck && npm run build",
+    "smoke": "node scripts/smoke-plugin.mjs",
+    "prepack": "npm run check && npm run smoke",
+    "sync:mirror": "node scripts/sync-to-dsh-plugins.mjs",
+    "sync:check": "node scripts/sync-to-dsh-plugins.mjs --check"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "cordis",
+    "plugin",
+    "skills",
+    "stock",
+    "quant",
+    "finance",
+    "a-share",
+    "tushare",
+    "iwencai",
+    "dsh-skills-stock"
+  ],
+  "author": "UncleC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kkutysllb/dsh-skills-stock.git"
+  },
+  "homepage": "https://github.com/kkutysllb/dsh-skills-stock#readme",
+  "bugs": {
+    "url": "https://github.com/kkutysllb/dsh-skills-stock/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "esbuild": "^0.25.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.9.0"
+  }
+}

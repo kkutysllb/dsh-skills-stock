@@ -1,0 +1,5 @@
+# selection-strategies 运行时依赖
+# 注：backtrader_strategies 为仓库内本地包（stock/backtrader_strategies/），
+#     需将该技能包加入 PYTHONPATH，无法通过 pip 安装。
+numpy
+pandas

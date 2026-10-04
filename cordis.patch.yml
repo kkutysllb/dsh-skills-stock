@@ -1,0 +1,15 @@
+# dsh-skills-stock bundle 层（KStock A 股量化投研技能包）。
+#
+# 声明于 package.json 的 dsh.bundle.patch，由 dsh plugin add 注册进
+# profile 的 dsh.profile.bundles（或 KCoder 桌面端物化到 web profile），
+# 启动时按层序合成。本层只挂一个 Host 服务行：激活时清理历史版本写入的
+# 插件预设目录（DSH 0.1.16 起 agent-presets 按 agent.cordis.yml 组合挂载，
+# 插件自造预设已失效），把 skills/manifest.json 清单里的 30 个技能注册为
+# runtime skill（rank 250，项目级 .dsh/skills 同名技能可覆盖），向
+# systemPrompt 通告技能路由与跨技能约定，并注册 /dsh-skills-stock RPC
+# 通道供 Web 侧边栏「投研工作台」（数据源凭据配置 + 技能库）使用。
+# 后续层（profile 自身 cordis.patch.yml、--patch 覆盖）可按行 id 覆写或禁用本行。
+
+- insert:
+    - id: dsh-skills-stock
+      name: 'dsh-skills-stock'
