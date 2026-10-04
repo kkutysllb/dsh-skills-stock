@@ -9,7 +9,7 @@ source: KStock vendor/skills（经 dsh-skills-stock 适配，勿在镜像侧直�
 
 > **dsh 适配说明**：本技能适配自 KStock（A 股量化智能体）技能包，注册为 dsh runtime skill。
 > - 本技能包根即激活提示（skill_resources）给出的资源基目录：正文中的 `scripts/`、`references/`、`../common` 等相对路径以该目录为基准解析；`<本技能包根>` 占位符（多见于 cd 命令）替换为该绝对路径后再执行。
-> - 产物（报告 HTML、图表、JSON、Excel）一律写入**当前工作目录**（QiLin 沙箱的工作区/缓存路径语义已按 dsh 语义替换）。
+> - 产物写入**当前工作目录**，并按 scripts/（脚本）/ data/（引擎中间产物）/ reports/（报告 JSON 与 HTML）三目录归位（QiLin 沙箱的工作区/缓存路径语义已按 dsh 语义替换）。
 > - 数据缺失时如实标注「缺失」，**禁止编造数据**。
 
 # A股行业六维一体深度分析引擎
@@ -121,15 +121,12 @@ python3 scripts/industry-query-cli.py --query "新能源板块行情"
 - **饼图** — 产业链各环节占比
 - **桑基图** — 产业链上下游流转
 
-### 阶段四：报告生成（单文件 HTML 直接落盘）
 
-dsh 宿主没有 render_html_report 看板工具，本技能在 dsh 下改为**直接编写并交付单文件 HTML 报告**（写入当前工作目录，双击浏览器可离线打开）。流程：
+### 阶段四：报告生成（html-report 技能）
 
-1. 将行业画像、估值排名、研报观点、实时资讯、产业链解读、宏观周期评估、风险与跟踪指标整理为报告 JSON，顶层字段：`title` / `generated_at` / `summary` / `assessment` / `risk_level` / `data_overview` / `core_analysis` / `risks` / `references` / `charts`。
-2. 图表用内嵌 SVG 或 CSS 绘制（可复用 chart-visualization 技能生成 ECharts 图表后以内嵌方式合入），**禁止使用远程图片 URL**。至少 3 个图表。
-3. 用文件写入工具把完整报告落盘为 `行业分析报告-<行业名>-<日期>.html`，并向用户给出文件绝对路径；**不要**把整份 HTML 贴进对话，也不要把大 JSON 读入上下文。
+本技能**不自行手写 HTML**，而是把结论整理为报告 JSON，用 html-report 技能自带的渲染器（纯标准库）产出单文件自包含看板。流程：
 
-报告覆盖：行业画像（五维雷达图 + 最新动态）、行业估值排名（柱状图）、投研观点摘要、行业实时资讯、产业链深度解读（桑基图/饼图）、宏观周期评估、风险与需跟踪指标。报告只给研究结论、情景条件、风险等级和需跟踪指标，**不给出买入/卖出/持有等交易建议**。
+1. 按报告 JSON 契约（html-report 技能 `references/report-schema.md`）整理数据：标题/摘要/指标卡/分节正文/图表（line / area / bar / scatter / pie / radar）/风险/参考来源，图表以内嵌 SVG 渲染，**禁止使用远程图片 URL**；2. 保存为 `reports/report.json` 后从工作区根执行`python3 "<html-report 技能包根>/scripts/render_report.py" reports/report.json -o reports/<主题名>.html`（技能包根 = 激活提示 skill_resources 给出的资源基目录；产物分区见顶部「dsh 适配说明」），stderr 出现告警必须修正数据后重渲；3. 用 report_archive 工具（契约见 html-report 技能）把 reports/ 下渲染出的 HTML 看板归档进报告库（report.json 是渲染输入，不必归档），交付时给出报告标题。
 
 ## 参考文档
 

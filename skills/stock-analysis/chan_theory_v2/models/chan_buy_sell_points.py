@@ -344,7 +344,9 @@ class ChanBuySellPointAnalyzer:
         """判断是否存在背驰"""
         # 背驰判断：后段力度小于前段，使用相对宽松的阈值
         # 0.8表示后段力度至少要比前段小20%才认为是背驰
-        return current_seg.strength < prev_seg.strength * 0.8
+        # KStock patch: 背驰阈值 0.8→0.88（衰减 12% 即认——实测宁德时代
+        # 日线同向段力度比 0.85/0.82 的典型趋势背驰被 20% 阈值全拦）
+        return current_seg.strength < prev_seg.strength * 0.88
     
     def _calculate_bsp_strength(self, current_seg: Seg, prev_seg: Seg) -> float:
         """计算买卖点强度"""

@@ -59,6 +59,13 @@ if _project_root not in sys.path:
 # ── 数据库 ──────────────────────────────────────────────────────────────────
 from dotenv import load_dotenv
 load_dotenv(os.path.join(_project_root, '.env'))
+# KStock patch: kk_common 由同级 common 技能提供（<skill>/../common/src）。
+_kk_common_src = os.path.normpath(
+    os.path.join(_script_dir, "..", "..", "common", "src")
+)
+if os.path.isdir(_kk_common_src) and _kk_common_src not in sys.path:
+    sys.path.insert(0, _kk_common_src)
+
 from kk_common import get_finance_data_gateway
 
 # ── 缠论模块 ────────────────────────────────────────────────────────────────

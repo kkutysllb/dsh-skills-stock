@@ -33,6 +33,10 @@ if _project_root not in sys.path:
 # ======================================================================
 
 def _get_tushare_api():
+    import os as _kstock_kk_os, sys as _kstock_kk_sys  # KStock patch: kk_common 同级解析
+    _kstock_kk_common = _kstock_kk_os.path.normpath(_kstock_kk_os.path.join(_kstock_kk_os.path.dirname(_kstock_kk_os.path.abspath(__file__)), "..", "..", "..", "common", "src"))
+    if _kstock_kk_os.path.isdir(_kstock_kk_common) and _kstock_kk_common not in _kstock_kk_sys.path:
+        _kstock_kk_sys.path.insert(0, _kstock_kk_common)
     from kk_common import get_finance_data_gateway
     from dotenv import load_dotenv
     load_dotenv(os.path.join(_project_root, '.env'))

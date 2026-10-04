@@ -29,6 +29,14 @@ if not TOKEN:
     print(json.dumps({"error": "TUSHARE_TOKEN 环境变量未设置"}))
     sys.exit(1)
 
+# KStock patch: kk_common 由同级 common 技能提供（<skill>/../common/src），
+# 1.x 沙箱靠 pip 安装；2.0 preset 镜像下无安装层，按脚本自身位置解析注入。
+_KK_COMMON_SRC = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "common", "src")
+)
+if os.path.isdir(_KK_COMMON_SRC) and _KK_COMMON_SRC not in sys.path:
+    sys.path.insert(0, _KK_COMMON_SRC)
+
 from kk_common import get_finance_data_gateway
 pro = get_finance_data_gateway()
 

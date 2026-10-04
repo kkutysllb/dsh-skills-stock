@@ -74,11 +74,9 @@ class TushareClient:
         if not self.token:
             raise ValueError("未找到 TUSHARE_TOKEN，请配置环境变量或在 .env 文件中设置")
 
-        # 设置 token
-        ts.set_token(self.token)
-
-        # 获取 API 对象
-        self.pro = ts.pro_api()
+        # 获取 API 对象（KStock patch: pro_api 显式传 token——set_token 会
+        # 固定写 ~/tk.csv 于 HOME 根，工作区沙箱写边界外会被拒）
+        self.pro = ts.pro_api(self.token)
 
         logger.info("Tushare API 初始化成功")
 

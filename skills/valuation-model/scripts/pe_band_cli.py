@@ -20,6 +20,14 @@ COMMON_CANDIDATE_PATHS = [
     "/mnt/skills/public/common",
 ]
 
+# KStock patch: kk_common 由同级 common 技能提供（<skill>/../common/src），
+# 首个 import 直接命中，免去 pip install -e（2.0 沙箱必拒）。
+import os as _kstock_kk_os, sys as _kstock_kk_sys
+_kstock_kk_common = _kstock_kk_os.path.normpath(_kstock_kk_os.path.join(_kstock_kk_os.path.dirname(_kstock_kk_os.path.abspath(__file__)), "..", "..", "common", "src"))
+if _kstock_kk_os.path.isdir(_kstock_kk_common) and _kstock_kk_common not in _kstock_kk_sys.path:
+    _kstock_kk_sys.path.insert(0, _kstock_kk_common)
+
+
 def _ensure_kk_common() -> None:
     try:
         import kk_common  # noqa: F401

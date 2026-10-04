@@ -30,6 +30,12 @@ _scripts_root = os.path.dirname(_script_dir)
 for _p in (_scripts_root, os.path.dirname(_scripts_root)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
+# KStock patch: kk_common 由同级 common 技能提供（public/common/src）。
+_kk_common_src = os.path.normpath(
+    os.path.join(_script_dir, "..", "..", "..", "common", "src")
+)
+if os.path.isdir(_kk_common_src) and _kk_common_src not in sys.path:
+    sys.path.insert(0, _kk_common_src)
 
 TOKEN = os.environ.get("TUSHARE_TOKEN", "")
 if not TOKEN:

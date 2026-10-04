@@ -184,6 +184,86 @@
       ]
     },
     {
+      "dir": "stock-due-diligence",
+      "name": "stock-due-diligence",
+      "description": " 个股尽调全景场景（编排手册）。用户问「XX 股票怎么样 / 个股深度分析 / 尽调 / 全维度研报」等单只股票深度问题时触发。并行编排 stock-analysis 引擎群 （公司信息/估值/财务深挖/盈利预测/筹码/新闻）+ financial-statement 三表 + valuation-model PE-Band + html-report 看板交付与报告库归档。 产出：单文件 HTML 个股尽调看板。",
+      "whenToUse": "用户问「XX 股票怎么样 / 个股深度分析 / 尽调 / 全维度研报」等单股深度问题时使用；并行编排 stock-analysis 引擎群 + financial-statement 三表 + valuation-model PE-Band，产出单文件 HTML 尽调看板",
+      "category": "场景编排",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "stock-screening-theme",
+      "name": "stock-screening-theme",
+      "description": " 自然语言选股流水线场景（编排手册）。用户问「帮我选股 / 筛选 XX 特征的 股票 / 高股息低估蓝筹 / 找标的」等选股类问题时触发。编排 a-stock-screener （自然语言→多策略筛选）→ 批量个股快评（stock-analysis 引擎群）→ html-report 汇总看板与报告库归档。产出：单文件 HTML 选股清单看板。",
+      "whenToUse": "用户问「帮我选股 / 筛选 XX 特征的股票 / 高股息低估蓝筹 / 找标的」等选股流水线类问题时使用；编排 a-stock-screener 筛选 → 批量个股快评 → html-report 汇总看板",
+      "category": "场景编排",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "strategy-backtest-theme",
+      "name": "strategy-backtest-theme",
+      "description": " 策略研究回测场景（编排手册）。用户问「写个策略回测 / 双均线策略表现 / 参数扫描 / 走前验证」等策略研究类问题时触发。编排 strategy-research （SignalEngine 合约 + 回测引擎库 + 内置三模板）+ 自建 driver 拉真实数据 + html-report 回测报告与报告库归档。产出：单文件 HTML 回测看板。",
+      "whenToUse": "用户问「写个策略回测 / 双均线策略表现 / 参数扫描 / 走前验证」等策略研究类问题时使用；编排 strategy-research 引擎 + 自建 driver 拉真实数据 + html-report 回测看板",
+      "category": "场景编排",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "factor-analysis-theme",
+      "name": "factor-analysis-theme",
+      "description": " 因子检验流水线场景（编排手册）。用户问「检验这个因子 / IC/IR 分析 / 分层回测 / 多因子选股 / 因子择时」等因子研究类问题时触发。编排 factor-research 八命令（build 因子面板防前视 → analyze IC/IR+分层 → filter/multifactor/timing/combine）+ html-report 报告与报告库归档。 产出：单文件 HTML 因子研究看板。",
+      "whenToUse": "用户要走完整因子研究流程（单因子检验 IC/IR/分层 → 多因子合成 → 六因子选股）并要 HTML 看板交付时使用；编排 factor-research 引擎群",
+      "category": "场景编排",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "chan-stock-theme",
+      "name": "chan-stock-theme",
+      "description": " 缠论个股与选股场景（编排手册）。用户问「缠论分析 / 笔段中枢 / 背驰 / 三类买卖点 / MACD 背驰选股」等缠论类问题时触发。编排 stock-analysis 的 缠论双引擎（analyze_stock_chan 单股全息形态 / run_chan_stock_selector 全池背驰选股）+ chart-visualization 图表 + html-report 看板交付与 报告库归档。产出：单文件 HTML 缠论看板。",
+      "whenToUse": "用户问「缠论分析 / 笔段中枢 / 背驰 / 三类买卖点 / MACD 背驰选股」等缠论类问题时使用；编排 stock-analysis 缠论双引擎 + chart-visualization + html-report 缠论看板",
+      "category": "场景编排",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "cb-panorama",
+      "name": "cb-panorama",
+      "description": " 可转债全景分析场景（编排手册）。用户问「可转债全景 / 转债市场温度 / 转债 估值 / 双低策略池 / 转债周报」等可转债市场类问题时触发。编排 cb-analysis 周度综合引擎（市场温度/规模结构/估值全景/资金情绪/双低池/条款事件， Tushare）+ 问财看板与筛选（16 模块日度补充）+ html-report 看板交付与 报告库归档。产出：单文件 HTML 全景看板。",
+      "whenToUse": "用户问「可转债全景 / 转债市场温度 / 转债估值 / 双低策略池 / 转债周报」等可转债市场类问题时使用；编排 cb-analysis 周度综合引擎 + 问财看板 + html-report 全景看板",
+      "category": "场景编排",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "market-linkage",
+      "name": "market-linkage",
+      "description": " A 股市场联动分析场景（编排手册）。用户问「市场联动 / 大盘联动 / 资金面 情绪面全景 / 今天市场怎么样 / 多维度联动分析」等市场全景类问题时触发。 编排 market-linkage-engine（8 维度引擎数据）+ 可选分维度并行解读 （futures-analysis / etf-analysis / macro-query）+ html-report 看板交付 与报告库归档。产出：单文件 HTML 联动看板（评分卡 + 8 维图表 + 结论）。",
+      "whenToUse": "用户问「市场联动 / 大盘联动 / 资金面情绪面全景 / 今天市场怎么样」等市场全景类问题时使用；编排 market-linkage-engine 8 维引擎 + 分维度并行解读 + html-report 联动看板（引擎本体是 market-linkage-engine）",
+      "category": "场景编排",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "index-futures-theme",
+      "name": "index-futures-theme",
+      "description": " 股指期货专题分析场景（编排手册）。用户问「期指分析 / 股指期货 / IF IC IH IM / 基差 / 贴水升水 / 期指多空持仓 / 中信席位」等股指期货类问题时触发。编排 futures-analysis 四维引擎（行情趋势 / 基差期限结构 / 前 20 席位持仓 / 综合研判 100 分）+ 可选期权与问财交叉 + html-report 看板交付与报告库 归档。产出：单文件 HTML 期指专题看板。",
+      "whenToUse": "用户问「期指分析 / 股指期货 / IF IC IH IM / 基差 / 贴水升水 / 期指多空持仓」等股指期货类问题时使用；编排 futures-analysis 四维引擎 + html-report 期指专题看板",
+      "category": "场景编排",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "option-etf-theme",
+      "name": "option-etf-theme",
+      "description": " 期权 ETF 专题分析场景（编排手册）。用户问「期权 ETF 分析 / 7 大期权 ETF / ETF 份额与期权波动率 / 50ETF 300ETF 500ETF 创业板 科创50 中证1000 深100」 等期权 ETF 类问题时触发。并行编排 etf-analysis（行情/份额/规模主面板）+ option-futures-linkage（期权五维联动，覆盖 4 条期指线）+ market-linkage-engine（8 维联动背景）+ html-report 看板交付与报告库归档。 产出：单文件 HTML 期权 ETF 专题看板（7 标的资金/情绪方向矩阵）。",
+      "whenToUse": "用户问「期权 ETF 分析 / 7 大期权 ETF / ETF 份额与期权波动率 / 50ETF 300ETF 创业板 科创50」等期权 ETF 类问题时使用；并行编排 etf-analysis + option-futures-linkage + market-linkage-engine + html-report 专题看板",
+      "category": "场景编排",
+      "requiredSecrets": []
+    },
+    {
+      "dir": "option-futures-linkage-theme",
+      "name": "option-futures-linkage-theme",
+      "description": " 期指期权联动分析场景（编排手册）。用户问「期指期权联动 / 期权 PCR 与期指 方向 / 期权持仓变化与期货持仓印证」等期权×期货交叉验证类问题时触发。 编排 option-futures-linkage 联动引擎（期权五维 × 期指维度，信号评分 -6..+6）+ futures-analysis / options-volatility 两翼交叉 + html-report 看板交付与报告库归档。产出：单文件 HTML 联动看板。",
+      "whenToUse": "用户问「期指期权联动 / 期权 PCR 与期指方向 / 期权持仓变化与期货持仓印证」等期权×期货交叉验证类问题时使用；编排 option-futures-linkage 联动引擎 + futures-analysis / options-volatility 两翼 + html-report 联动看板",
+      "category": "场景编排",
+      "requiredSecrets": []
+    },
+    {
       "dir": "tushare-data",
       "name": "tushare-data",
       "description": "Tushare 官方数据适配技能——A 股/指数/ETF/基金/期货/期权/财务/估值/资金流/宏观全量数据获取的唯一官方入口，分析类技能必须通过本技能或 common.finance_data_gateway 间接调用，禁止直接 import tushare",
@@ -272,6 +352,14 @@
       "requiredSecrets": [
         "IWENCAI_API_KEY"
       ]
+    },
+    {
+      "dir": "html-report",
+      "name": "html-report",
+      "description": "KStock 研究报告看板生成与归档——把研究结论整理为结构化报告 JSON，用技能自带渲染器（纯标准库，内联 SVG 图表）产出单文件自包含 HTML 看板，并一键归档进 KStock 报告库。适用于个股/行业/因子/策略/选股等一切需要交付 HTML 看板的场景。",
+      "whenToUse": "需要把完成的研究交付为可视化 HTML 看板并归档报告库时使用（结构化报告 JSON → 纯标准库渲染器 → 单文件自包含 HTML，report_archive 工具归档）；个股/行业/因子/策略/选股等场景报告交付的统一出口",
+      "category": "呈现",
+      "requiredSecrets": []
     },
     {
       "dir": "chart-visualization",

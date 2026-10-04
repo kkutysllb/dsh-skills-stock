@@ -763,6 +763,10 @@ def main():
     if not token:
         print("\n[错误] 未找到 TUSHARE_TOKEN，请在 .env 中配置")
         sys.exit(1)
+    import os as _kstock_kk_os, sys as _kstock_kk_sys  # KStock patch: kk_common 同级解析
+    _kstock_kk_common = _kstock_kk_os.path.normpath(_kstock_kk_os.path.join(_kstock_kk_os.path.dirname(_kstock_kk_os.path.abspath(__file__)), "..", "..", "..", "common", "src"))
+    if _kstock_kk_os.path.isdir(_kstock_kk_common) and _kstock_kk_common not in _kstock_kk_sys.path:
+        _kstock_kk_sys.path.insert(0, _kstock_kk_common)
     from kk_common import get_finance_data_gateway
     _pro = get_finance_data_gateway()
 

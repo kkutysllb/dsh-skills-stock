@@ -32,6 +32,12 @@ import pandas as pd
 logger = logging.getLogger("DataAdapter")
 
 # ── 尝试导入 common ──────────────────────────────────────────────────────
+# KStock patch: kk_common 由同级 common 技能提供（<skill>/../common/src）。
+import os as _kstock_kk_os, sys as _kstock_kk_sys
+_kstock_kk_common = _kstock_kk_os.path.normpath(_kstock_kk_os.path.join(_kstock_kk_os.path.dirname(_kstock_kk_os.path.abspath(__file__)), "..", "..", "common", "src"))
+if _kstock_kk_os.path.isdir(_kstock_kk_common) and _kstock_kk_common not in _kstock_kk_sys.path:
+    _kstock_kk_sys.path.insert(0, _kstock_kk_common)
+
 try:
     from kk_common.iwencai_client import IwencaiClient, APIError as IwencaiError
     from kk_common.tushare_client import get_tushare_client, TushareClient

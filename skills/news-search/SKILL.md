@@ -9,7 +9,7 @@ source: KStock vendor/skills（经 dsh-skills-stock 适配，勿在镜像侧直�
 
 > **dsh 适配说明**：本技能适配自 KStock（A 股量化智能体）技能包，注册为 dsh runtime skill。
 > - 本技能包根即激活提示（skill_resources）给出的资源基目录：正文中的 `scripts/`、`references/`、`../common` 等相对路径以该目录为基准解析；`<本技能包根>` 占位符（多见于 cd 命令）替换为该绝对路径后再执行。
-> - 产物（报告 HTML、图表、JSON、Excel）一律写入**当前工作目录**（QiLin 沙箱的工作区/缓存路径语义已按 dsh 语义替换）。
+> - 产物写入**当前工作目录**，并按 scripts/（脚本）/ data/（引擎中间产物）/ reports/（报告 JSON 与 HTML）三目录归位（QiLin 沙箱的工作区/缓存路径语义已按 dsh 语义替换）。
 > - 数据缺失时如实标注「缺失」，**禁止编造数据**。
 
 # 新闻搜索技能
@@ -20,6 +20,23 @@ source: KStock vendor/skills（经 dsh-skills-stock 适配，勿在镜像侧直�
 ## 技能概述
 
 本技能是一个财经领域为主的资讯搜索引擎，通过调用同花顺问财的财经资讯搜索接口，帮助用户获取最新的财经新闻、政策动态、行业革新和企业业务进展等信息。本技能严格遵守问财OpenAPI网关规范。
+
+## 工作区子布局（新闻场景）
+
+采集批次、解读稿、简报看板混落会把工作区堆乱。产物在三分区
+（scripts / data / reports，见顶部「dsh 适配说明」）内按下表归位：
+
+| 路径 | 放什么 |
+|------|--------|
+| `data/news/<YYYYMMDD>/<主题>/` | 当日采集批次原始 JSON（news_cN.json、原始快照、探针输出） |
+| `data/news/<YYYYMMDD>/digest.json` | 热点简报聚合产物（多批次收齐后的汇总） |
+| `reports/news/<YYYYMMDD>_<事件>.md` | 单事件解读稿（解读属报告产物，禁止散落工作区根） |
+| `reports/hot-<YYYYMMDD>.html` | 热点简报 HTML 看板（经 html-report 渲染，可归档报告库） |
+
+- 一切脚本（含临时搜索/探针脚本）只落 `scripts/`；禁止把脚本、`.txt`
+  杂物落 `data/` 根；
+- 采集命令一律从工作区根执行，输出重定向进对应批次目录；
+- 定时任务的多批次采集并行后台化，收齐后汇总进 `digest.json` 再渲染。
 
 ## 首次使用 - 获取 API Key
 

@@ -85,6 +85,26 @@ const SPEC = [
     whenToUse: '用户要市场全景体检（股/债/汇/商品/流动性等 8 维联动评分，日度/周度）时使用' },
   { dir: 'industry-analysis', name: 'industry-analysis', category: '市场全景',
     whenToUse: '用户要行业层面研究（行业画像、估值排名、产业链图谱、景气度、投研观点）时使用' },
+  { dir: 'stock-due-diligence', name: 'stock-due-diligence', category: '场景编排',
+    whenToUse: '用户问「XX 股票怎么样 / 个股深度分析 / 尽调 / 全维度研报」等单股深度问题时使用；并行编排 stock-analysis 引擎群 + financial-statement 三表 + valuation-model PE-Band，产出单文件 HTML 尽调看板' },
+  { dir: 'stock-screening-theme', name: 'stock-screening-theme', category: '场景编排',
+    whenToUse: '用户问「帮我选股 / 筛选 XX 特征的股票 / 高股息低估蓝筹 / 找标的」等选股流水线类问题时使用；编排 a-stock-screener 筛选 → 批量个股快评 → html-report 汇总看板' },
+  { dir: 'strategy-backtest-theme', name: 'strategy-backtest-theme', category: '场景编排',
+    whenToUse: '用户问「写个策略回测 / 双均线策略表现 / 参数扫描 / 走前验证」等策略研究类问题时使用；编排 strategy-research 引擎 + 自建 driver 拉真实数据 + html-report 回测看板' },
+  { dir: 'factor-analysis-theme', name: 'factor-analysis-theme', category: '场景编排',
+    whenToUse: '用户要走完整因子研究流程（单因子检验 IC/IR/分层 → 多因子合成 → 六因子选股）并要 HTML 看板交付时使用；编排 factor-research 引擎群' },
+  { dir: 'chan-stock-theme', name: 'chan-stock-theme', category: '场景编排',
+    whenToUse: '用户问「缠论分析 / 笔段中枢 / 背驰 / 三类买卖点 / MACD 背驰选股」等缠论类问题时使用；编排 stock-analysis 缠论双引擎 + chart-visualization + html-report 缠论看板' },
+  { dir: 'cb-panorama', name: 'cb-panorama', category: '场景编排',
+    whenToUse: '用户问「可转债全景 / 转债市场温度 / 转债估值 / 双低策略池 / 转债周报」等可转债市场类问题时使用；编排 cb-analysis 周度综合引擎 + 问财看板 + html-report 全景看板' },
+  { dir: 'market-linkage', name: 'market-linkage', category: '场景编排',
+    whenToUse: '用户问「市场联动 / 大盘联动 / 资金面情绪面全景 / 今天市场怎么样」等市场全景类问题时使用；编排 market-linkage-engine 8 维引擎 + 分维度并行解读 + html-report 联动看板（引擎本体是 market-linkage-engine）' },
+  { dir: 'index-futures-theme', name: 'index-futures-theme', category: '场景编排',
+    whenToUse: '用户问「期指分析 / 股指期货 / IF IC IH IM / 基差 / 贴水升水 / 期指多空持仓」等股指期货类问题时使用；编排 futures-analysis 四维引擎 + html-report 期指专题看板' },
+  { dir: 'option-etf-theme', name: 'option-etf-theme', category: '场景编排',
+    whenToUse: '用户问「期权 ETF 分析 / 7 大期权 ETF / ETF 份额与期权波动率 / 50ETF 300ETF 创业板 科创50」等期权 ETF 类问题时使用；并行编排 etf-analysis + option-futures-linkage + market-linkage-engine + html-report 专题看板' },
+  { dir: 'option-futures-linkage-theme', name: 'option-futures-linkage-theme', category: '场景编排',
+    whenToUse: '用户问「期指期权联动 / 期权 PCR 与期指方向 / 期权持仓变化与期货持仓印证」等期权×期货交叉验证类问题时使用；编排 option-futures-linkage 联动引擎 + futures-analysis / options-volatility 两翼 + html-report 联动看板' },
   { dir: 'tushare-data', name: 'tushare-data', category: '数据查询',
     whenToUse: '需要从 Tushare Pro 取结构化数据（行情/基本面/估值/资金流/宏观五类）且已知接口名时使用；官方数据适配层，唯一直连 Tushare 的位置' },
   { dir: 'zhishu-query', name: 'zhishu-query', category: '数据查询',
@@ -103,6 +123,9 @@ const SPEC = [
     whenToUse: '用户要查市场或公司事件（增减持、质押、回购、并购重组、解禁等）时使用（问财通道）' },
   { dir: 'hithink-futures', name: 'hithink-futures', category: '数据查询',
     whenToUse: '用户要查商品期货/期权合约行情、基差、仓单等基础数据时使用（问财通道）' },
+  { dir: 'html-report', name: 'html-report', category: '呈现',
+    whenToUse: '需要把完成的研究交付为可视化 HTML 看板并归档报告库时使用（结构化报告 JSON → 纯标准库渲染器 → 单文件自包含 HTML，report_archive 工具归档）；个股/行业/因子/策略/选股等场景报告交付的统一出口',
+    note: '本技能渲染器为纯标准库 Python（scripts/render_report.py），无外部依赖；归档一步在 dsh 下改用 report_archive 工具（KStock 桌面端本地 API 的 curl 模板已替换）。' },
   { dir: 'chart-visualization', name: 'chart-visualization', category: '呈现',
     whenToUse: '需要把数据画成专业图表（26 种：雷达/折线/柱状/饼图/K线/热力等，Node.js 生成 ECharts 单文件 HTML）时使用',
     note: '本技能脚本为 Node.js（scripts/generate.js），需要 Node ≥18 与 npm 安装 echarts，无数据密钥。' },
@@ -110,7 +133,11 @@ const SPEC = [
     whenToUse: 'kk_common 公共数据网关库（finance_data_gateway/tushare_client/iwencai_client/缓存/格式化），是其他分析技能脚本运行的前置依赖，一般不单独触发；排查数据网关、Tushare/问财客户端问题时使用' },
 ]
 
-const EXCLUDED_SKILLS = new Set(['sandbox-path-guide']) // QiLin 沙箱专属，dsh 无此语义
+// QiLin 宿主专属语义，dsh 无对应物：
+// - sandbox-path-guide：沙箱路径规范技能（dsh 相对路径以 resourceBase 解析）
+// - market-scan-workflow：依赖 QiLin 原生 workflow 编排工具（agent/pipeline/
+//   parallel 钩子 + JS 脚本），dsh 无此编排原语；待 dsh 提供后再评估适配
+const EXCLUDED_SKILLS = new Set(['sandbox-path-guide', 'market-scan-workflow'])
 const EXCLUDED_ENTRIES = new Set(['__pycache__', 'node_modules', 'build'])
 const EXCLUDED_SUFFIXES = ['.pyc', '.DS_Store']
 const EXCLUDED_PATTERNS = [/\.egg-info$/]
@@ -209,28 +236,70 @@ function bodyRules(selfDir, aliases) {
   rules.push([/`TUSHARE_TOKEN` 由系统注入沙箱环境，脚本直接读取/g,
     '`TUSHARE_TOKEN` 从凭据文件注入运行环境（运行前 source 凭据文件，见「凭据配置」），脚本直接读取'])
   rules.push([/lead_soul\.md 场景第/g, '产品场景手册场景第'])
+  // ── KStock 2.0 宿主语义（桌面端本地 API / 内置 present 工具 / 沙箱规范技能）──
+  // 报告库归档：curl 模板措辞 → report_archive 工具
+  rules.push([/用 html-report 技能 SKILL\.md 中的 curl 模板/g, '用 report_archive 工具（契约见 html-report 技能）'])
+  rules.push([/html-report SKILL\.md 的 curl 模板/g, 'html-report 技能的 report_archive 工具'])
+  rules.push([/把 reports\/ 下的两份产物归档进报告库（POST \/kstock-api\/reports）/g,
+    '把 reports/ 下渲染出的 HTML 看板归档进报告库（report.json 是渲染输入，不必归档）'])
+  // html-report 基目录占位符 → dsh 技能包根口径
+  rules.push([/<html-report 基目录>/g, '<html-report 技能包根>'])
+  rules.push([/基目录 = html-report 技能加载结果给出的 Base directory/g, '技能包根 = 激活提示 skill_resources 给出的资源基目录'])
+  // QiLin 内置 present 工具 → 文件绝对路径交付
+  rules.push([/归档后用 `present` 呈现/g, '归档后向用户给出文件绝对路径交付'])
+  rules.push([/`present` 呈现/g, '向用户给出文件绝对路径交付'])
+  rules.push([/，present 呈现/g, '，向用户给出文件绝对路径交付'])
+  // KStock 报告库 API 回执字段 → report_archive 工具回执口径
+  rules.push([/归档成功返回 `report_id` 与 `content_url`。/g, '归档成功返回 `report_id` 与落盘绝对路径（content_path）。'])
+  // KStock 桌面工作台 → dsh 投研工作台
+  rules.push([/量化工作台 → 报告库/g, '投研工作台 → 报告库'])
+  rules.push([/「量化工作台/g, '「投研工作台'])
+  // 沙箱规范技能引用 → 顶部适配说明（内联产物分区纪律）；容忍跨行断行
+  rules.push([/见[ \t]*(\n[ \t]*)?sandbox-path-guide/g, '见顶部「dsh 适配说明」'])
+  // 场景手册归档行的 URL 尾注（curl 模板本体在 html-report，dsh 走工具）
+  rules.push([/\n?\s*`POST \/kstock-api\/reports`（模板读取的是 `reports\/` 下的两份产物）；/g, ''])
+  // KStock 密钥路径 → dsh 数据根凭据文件
+  rules.push([/~\/kstock\/config\/secrets\.env/g, '<数据根>/secrets.env'])
+  // 桌面端本地 API 三步入库的引子句（围栏块本体由 rewriteArchiveBlocks 整块替换）
+  rules.push([/引擎本机\s*`http:\/\/127\.0\.0\.1:18001`，\s*\n\s*三步（均 curl POST，失败不阻塞交付）：/g,
+    'dsh 下走本插件注册的同名四库 agent 工具（投研工作台对应库面板随时回看），三步（工具调用，失败不阻塞交付）：'])
+  rules.push([/引擎本机\s*\n?\s*`http:\/\/127\.0\.0\.1:18001`，\s*三步（均 curl POST，失败不阻塞交付）：/g,
+    'dsh 下走本插件注册的同名四库 agent 工具（投研工作台对应库面板随时回看），三步（工具调用，失败不阻塞交付）：'])
+  // PATCH 更新语义（dsh 无 PATCH）：既有 id 迭代
+  rules.push([/不要 POST 新(策略|因子|方案)——`PATCH \/kstock-api\/\w+\/\{id\}`\s*\n\s*更新 (?:hypothesis|criteria 摘要)；/g,
+    '不要 *_create 新$1——用 *_list 定位既有 id 后迭代；'])
+  rules.push([/ ?POST 新版本/g, '*_save_version 落新版本'])
   return rules
 }
 
-/** industry-analysis 阶段四：render_html_report/present_files → 直接落盘单文件 HTML。
- * 逐行精准替换（块级整段匹配对空行/措辞漂移脆弱）。 */
-const INDUSTRY_LINE_REWRITES = [
-  ['### 阶段四：报告生成（内置 render_html_report 工具）',
-    '### 阶段四：报告生成（单文件 HTML 直接落盘）'],
-  ['本技能**不自行编写报告或绘图代码**，而是调用内置 `render_html_report` 工具统一渲染。流程：',
-    'dsh 宿主没有 render_html_report 看板工具，本技能在 dsh 下改为**直接编写并交付单文件 HTML 报告**（写入当前工作目录，双击浏览器可离线打开）。流程：'],
-  ['2. 为每个图表按 `charts[].{tool, title, alt, args}` 结构构造，图表以内嵌 SVG 渲染，**禁止使用远程图片 URL**。至少 3 个图表。args 的完整字段规范以工具描述中的契约说明为准。',
-    '2. 图表用内嵌 SVG 或 CSS 绘制（可复用 chart-visualization 技能生成 ECharts 图表后以内嵌方式合入），**禁止使用远程图片 URL**。至少 3 个图表。'],
-  ['3. 调用 `render_html_report(report_json, filename="report.html")`；若完整 JSON 已保存为 `./*.json`，改用 `render_html_report_from_file(report_json_path="./report.json", filename="report.html")`，禁止先把大 JSON 读入上下文；渲染成功后用 `present_files` 交付。',
-    '3. 用文件写入工具把完整报告落盘为 `行业分析报告-<行业名>-<日期>.html`，并向用户给出文件绝对路径；**不要**把整份 HTML 贴进对话，也不要把大 JSON 读入上下文。'],
-]
+/* KStock 桌面端本地 API（127.0.0.1:18001）的 curl 入库围栏块 → dsh 四库工具等价步骤。
+ * 含 kstock-api/<lib> 的 ```bash 块整块替换为对应库的工具调用清单。 */
+const ARCHIVE_TOOL_BLOCKS = {
+  strategies: `1. \`strategy_create\`（{name, hypothesis}）建策略资产，返回 \`strategy_id\`；
+2. \`strategy_save_version\`（{strategy_id, code, params, change_note, parent_version}）存代码版本：code=策略信号/回测核心代码全文（≤512KB）；parent_version 传 \`strategy_get_latest\` 读到的当前版本（乐观锁）；
+3. \`strategy_record_backtest\`（{strategy_id, version, data_start, data_end, rules, metrics, equity?, trades?}）存回测结果：rules 原样抄录 A 股交易规则（可带 \`report_id\` 建看板链）；metrics 面板渲染键 total_return_pct / annual_return_pct / sharpe_ratio / max_drawdown_pct / win_rate_pct / trade_count；equity=净值序列（≤2MB），trades=交易清单（≤4MB）。`,
+  factors: `1. \`factor_create\`（{name, hypothesis, category}）建因子资产，返回 \`factor_id\`；
+2. \`factor_save_version\`（{factor_id, code, params, change_note, parent_version}）存因子代码版本（code 全文入库，禁止只留在会话工作区）；
+3. \`factor_record_run\`（{factor_id, version, universe, data_start, data_end, config, metrics, ic_series?, layers?}）存检验结果：config 原样抄录检验配置；metrics 含 ic_mean / ir 等核心键；ic_series=逐期 IC（≤2MB），layers=分层回测（≤4MB）。`,
+  selections: `1. \`selection_create\`（{name, criteria}）建选股方案（一句话口径），返回 \`selection_id\`；
+2. \`selection_save_version\`（{selection_id, criteria_json, change_note, parent_version}）存口径版本：criteria_json.summary 必填；
+3. \`selection_record_run\`（{selection_id, version, trade_date, universe, rules, metrics, report?, picks?}）存执行结果：picks=[{code,name,score,strategies,rank}]（code 带交易所后缀），report=报告全文。`,
+  reports: `调用 \`report_archive\` 工具归档（投研工作台「报告库」随时查看）：{title, content, symbol?, report_type?, generated_at?, period_start?, period_end?, risk_level?, coverage_status?}，content 传 \`reports/<主题名>.html\` 全文（≤8MB）。`,
+}
+
+function rewriteArchiveBlocks(body) {
+  return body.replace(/```bash\n([\s\S]*?)```/g, (block, inner) => {
+    for (const lib of ['strategies', 'factors', 'selections', 'reports']) {
+      if (inner.includes(`kstock-api/${lib}`)) return ARCHIVE_TOOL_BLOCKS[lib]
+    }
+    return block
+  })
+}
 
 function transformBody(body, item, aliases) {
   let out = body
   for (const [pattern, replacement] of bodyRules(item.dir, aliases)) out = out.replace(pattern, replacement)
-  if (item.dir === 'industry-analysis') {
-    for (const [from, to] of INDUSTRY_LINE_REWRITES) out = out.replace(from, to)
-  }
+  out = rewriteArchiveBlocks(out)
   return out
 }
 
@@ -239,7 +308,7 @@ function adaptNotes(item, secrets) {
   const head = [
     `> **dsh 适配说明**：本技能适配自 KStock（A 股量化智能体）技能包，注册为 dsh runtime skill。`,
     `> - 本技能包根即激活提示（skill_resources）给出的资源基目录：正文中的 \`scripts/\`、\`references/\`、\`../common\` 等相对路径以该目录为基准解析；\`<本技能包根>\` 占位符（多见于 cd 命令）替换为该绝对路径后再执行。`,
-    `> - 产物（报告 HTML、图表、JSON、Excel）一律写入**当前工作目录**（QiLin 沙箱的工作区/缓存路径语义已按 dsh 语义替换）。`,
+    `> - 产物写入**当前工作目录**，并按 scripts/（脚本）/ data/（引擎中间产物）/ reports/（报告 JSON 与 HTML）三目录归位（QiLin 沙箱的工作区/缓存路径语义已按 dsh 语义替换）。`,
     `> - 数据缺失时如实标注「缺失」，**禁止编造数据**。`,
   ]
   if (item.note) head.push(`> - ${item.note}`)
@@ -337,39 +406,39 @@ const SCRIPT_PATCHES = [
     },
   },
   {
-    // common 缓存目录：~/.kstock 写死 → 宿主 home 口径（数据根 dsh-skills-stock/，
-    // 与 host 侧 stockHome() 同一解析）。默认从「父目录存在才启用」改为始终
-    // 解析——写路径已有 makedirs(exist_ok=True)，dsh 上缓存从旁路变为可用。
+    // common 缓存目录（KStock 2.0 重写后的锚点）：持久候选从 ~/.kstock 写死
+    // 改为宿主 home 口径（<数据根>/cache/market-data，与 host 侧 stockHome()
+    // 同一解析）。上游新逻辑自带「探测失败落系统临时区、绝不因缓存失败」
+    // 语义，dsh 侧只替换持久目录候选；docstring 第 3 条（临时区保底）不动。
     file: ['common', 'src', 'kk_common', 'market_data_cache.py'],
     apply(text) {
       let out = text
       const doc2Old = [
-        '  2. /mnt/cache/market-data（沙箱挂载视图，LocalSandbox 把它映射回',
-        '     ~/.kstock/cache/market-data，与 gateway 进程视图同一物理目录）；',
+        '  2. ~/.kstock/cache/market-data（宿主直跑视图：非沙箱进程可写时启用，',
+        '     持久复用）；',
       ].join('\n')
       if (!out.includes(doc2Old)) throw new Error('market_data_cache.py docstring 第 2 条未命中')
-      out = out.replace(doc2Old, '  2. /mnt/cache/market-data（QiLin 沙箱挂载视图；dsh 宿主上不存在，自动跳过）；')
-      const doc3Old = '  3. ~/.kstock/cache/market-data（gateway / 开发态直跑视图）。'
-      if (!out.includes(doc3Old)) throw new Error('market_data_cache.py docstring 第 3 条未命中')
-      out = out.replace(doc3Old, [
-        '  3. <宿主 home>/dsh-skills-stock/cache/market-data（dsh 数据根；宿主 home',
-        '     按 $QILIN_HOME → $DSH_HOME → ~/.dsh 解析，与插件凭据/三库同根）。',
+      out = out.replace(doc2Old, [
+        '  2. <宿主 home>/dsh-skills-stock/cache/market-data（dsh 数据根，与凭据/',
+        '     三库同根；宿主 home 按 $QILIN_HOME → $DSH_HOME → ~/.dsh 解析）；',
       ].join('\n'))
       const homeOld = [
-        '    home = os.path.expanduser("~")',
-        '    if home and home != "~":',
-        '        default = os.path.join(home, ".kstock", "cache", "market-data")',
-        '        if os.path.isdir(os.path.dirname(default)):',
-        '            return default',
-        '    return None',
+        '        home = os.path.expanduser("~")',
+        '        _resolved_dir = None',
+        '        if home and home != "~":',
+        '            _resolved_dir = _probe_writable_dir(',
+        '                os.path.join(home, ".kstock", "cache", "market-data")',
+        '            )',
       ].join('\n')
       if (!out.includes(homeOld)) throw new Error('market_data_cache.py 默认目录块未命中')
       out = out.replace(homeOld, [
-        '    # dsh-skills-stock 数据根：跟随宿主 home（$QILIN_HOME → $DSH_HOME →',
-        '    # ~/.dsh），缓存落在 <数据根>/cache/market-data，首次写入自动建目录。',
-        '    root = os.getenv("QILIN_HOME", "").strip() or os.getenv("DSH_HOME", "").strip() \\',
-        '        or os.path.join(os.path.expanduser("~"), ".dsh")',
-        '    return os.path.join(root, "dsh-skills-stock", "cache", "market-data")',
+        '        # dsh-skills-stock 数据根：跟随宿主 home（$QILIN_HOME → $DSH_HOME →',
+        '        # ~/.dsh），缓存落 <数据根>/cache/market-data；探测失败仍落临时区。',
+        '        root = os.getenv("QILIN_HOME", "").strip() or os.getenv("DSH_HOME", "").strip() \\',
+        '            or os.path.join(os.path.expanduser("~"), ".dsh")',
+        '        _resolved_dir = _probe_writable_dir(',
+        '            os.path.join(root, "dsh-skills-stock", "cache", "market-data")',
+        '        )',
       ].join('\n'))
       return out
     },
@@ -456,9 +525,16 @@ writeFileSync(join(OUT_SKILLS, 'manifest.json'), JSON.stringify(manifest, null, 
 /* 自检：适配产物不得残留 QiLin 宿主语义（发现即失败，防止规则漏网）。 */
 const RESIDUAL_PATTERNS = [
   [/\/mnt\/(skills|user-data|cache)/, '残留 /mnt 沙箱路径'],
-  [/render_html_report\(|render_html_report_from_file|present_files|`render_html_report` 工具/, '残留 QiLin 内置工具引用'],
+  [/render_html_report\(|render_html_report_from_file|present_files/, '残留 QiLin 内置工具引用'],
   [/由系统注入沙箱环境/, '残留沙箱密钥注入措辞'],
   [/wait_for_background_task/, '残留 QiLin 后台任务工具引用'],
+  [/kstock-api|127\.0\.0\.1:18001/, '残留 KStock 桌面端本地 API 引用'],
+  [/`present`|present 呈现/, '残留 QiLin present 工具引用'],
+  [/sandbox-path-guide/, '残留 sandbox-path-guide 技能引用'],
+  [/~\/kstock/, '残留 ~/.kstock 宿主路径'],
+  [/均 curl POST/, '残留 curl 入库措辞'],
+  [/PATCH \/kstock-api/, '残留 PATCH 入库措辞'],
+  [/◆TODO◆|workflow 工具的 meta 参数/, '残留 QiLin workflow 模板语义'],
 ]
 let residuals = 0
 for (const item of manifest.skills) {
