@@ -7,6 +7,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { ServiceError, SECRET_KEYS, WorkbenchService, type SecretKey } from './service.ts'
 import { LibraryError, isLibraryKind, type LibraryStore } from './library.ts'
+import { ReportError, type ReportStore } from './reports.ts'
 
 export const RPC_CHANNEL = '/dsh-skills-stock'
 
@@ -48,12 +49,12 @@ interface CordisContext {
  * route effect 跑在 connection 插件自己的 fiber 上，第三方 patch 行无法
  * 获得 webServer 注入）。服务面：凭据受控写 + 三库只读（写入走 agent
  * 工具，工作台 UI 保持 KStock 的「建库只由 agent 完成」纪律）。 */
-export function registerWorkbenchRpc(ctx: CordisContext, service: WorkbenchService, library: LibraryStore): () => void {
+export function registerWorkbenchRpc(ctx: CordisContext, service: WorkbenchService, library: LibraryStore, reports?: ReportStore): () => void {
   return ctx.effect(() => {
     const registered = ctx.webServer.register({
       kind: 'prefix',
       path: RPC_CHANNEL,
-      handler: (req, res) => { void serveRpcRequest(ctx, service, library, req, res) },
+      handler: (req, res) => { void serveRpcRequest(ctx, service, library, reports, req, res) },
     })
     return () => {
       if (typeof registered === 'function') registered()
@@ -65,6 +66,7 @@ async function serveRpcRequest(
   ctx: CordisContext,
   service: WorkbenchService,
   library: LibraryStore,
+  reports: ReportStore | undefined,
   req: IncomingMessage,
   res: ServerResponse,
 ): Promise<void> {
@@ -143,7 +145,7 @@ async function serveRpcRequest(
     })
     return
   }
-  const result = await handleWorkbenchRpc(service, library, envelope.method, envelope.payload, abort.signal)
+  const result = await handleWorkbenchRpc(service, library, reports, envelope.method, envelope.payload, abort.signal)
   reply(200, { type: 'server-response', rpcId: envelope.rpcId, result })
 }
 
@@ -151,6 +153,7 @@ async function serveRpcRequest(
 export async function handleWorkbenchRpc(
   service: WorkbenchService,
   library: LibraryStore,
+  reports: ReportStore | undefined,
   endpoint: string,
   payload: unknown,
   signal: AbortSignal,
@@ -162,6 +165,18 @@ export async function handleWorkbenchRpc(
     }
     if (endpoint === 'skills') {
       return ok(service.skills())
+    }
+    if (endpoint === 'reports_list') {
+      if (reports === undefined) return fail('not-found', '报告库未启用')
+      return ok({ items: reports.list() })
+    }
+    if (endpoint === 'reports_get') {
+      if (reports === undefined) return fail('not-found', '报告库未启用')
+      const body = typeof payload === 'object' && payload !== null ? payload as Record<string, unknown> : {}
+      const reportId = typeof body['report_id'] === 'string' ? body['report_id'] : ''
+      if (reportId === '') return fail('invalid', 'report_id 必填')
+      const withContent = body['content'] === true
+      return ok(reports.get(reportId, withContent))
     }
     if (endpoint === 'library_list') {
       const kind = libraryKindOf(payload)
@@ -211,7 +226,7 @@ export async function handleWorkbenchRpc(
     }
     return fail('not-found', `unknown endpoint ${JSON.stringify(endpoint)}`)
   } catch (error) {
-    if (error instanceof LibraryError) return fail(error.code, error.message)
+    if (error instanceof LibraryError || error instanceof ReportError) return fail(error.code, error.message)
     return toErrorResult(error)
   }
 }

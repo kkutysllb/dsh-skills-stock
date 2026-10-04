@@ -5,7 +5,7 @@
  *    插件自造预设已失效；apply 时幂等清理历史版本写入的
  *    <宿主 home>/.agent-presets/dsh-skills-stock/（best-effort，失败不阻断加载）。
  * 2. 技能注册：读取包内 skills/manifest.json，逐个读取 SKILL.md 剥离
- *    frontmatter 后经 ctx.skills.register() 注册为 runtime skill（30 个，
+ *    frontmatter 后经 ctx.skills.register() 注册为 runtime skill（41 个，
  *    全局层，全 profile 会话可见；rank 250）。
  * 3. 能力通告：向 systemPrompt 注册一段能力路由与跨技能约定 section
  *    （可经 config.announceToAgent 关闭）。
@@ -27,15 +27,17 @@ import { dirname, join } from 'node:path'
 import { KSTOCK_GUIDANCE, SECTION_ORDER } from './guidance.ts'
 import { LibraryStore } from './library.ts'
 import { registerWorkbenchRpc } from './rpc.ts'
+import { ReportStore } from './reports.ts'
 import { WorkbenchService, type SkillManifestEntry } from './service.ts'
-import { libraryToolDefs } from './tools.ts'
+import { libraryToolDefs, reportToolDefs } from './tools.ts'
 import { legacyPresetDirs, migrateLegacyStockHome } from './stock-home.ts'
 
 // 测试与下游集成面：RPC 端点直测、服务直构、通告文本
 export { handleWorkbenchRpc, RPC_CHANNEL } from './rpc.ts'
 export { WorkbenchService, SECRET_KEYS } from './service.ts'
 export { LibraryStore, LibraryError } from './library.ts'
-export { libraryToolDefs, ToolRejection } from './tools.ts'
+export { ReportStore, ReportError, MAX_REPORT_BYTES } from './reports.ts'
+export { libraryToolDefs, reportToolDefs, ToolRejection } from './tools.ts'
 export { KSTOCK_GUIDANCE, SECTION_ORDER } from './guidance.ts'
 export { stockHome, secretsPath, migrateLegacyStockHome } from './stock-home.ts'
 
@@ -151,15 +153,16 @@ export function apply(ctx: {
     }))
   }
 
-  // 三库存储 + agent 工具（15 个 *_store 工具；registerTools:false 可关闭）
+  // 四库存储 + agent 工具（三库 15 个 + 报告库 3 个；registerTools:false 可关闭）
   const library = new LibraryStore()
+  const reports = new ReportStore()
   if (config.registerTools !== false && ctx.tools !== undefined) {
-    for (const def of libraryToolDefs(library)) {
+    for (const def of [...libraryToolDefs(library), ...reportToolDefs(reports)]) {
       disposers.push(ctx.tools.register(def))
     }
   }
 
-  disposers.push(registerWorkbenchRpc(ctx as never, new WorkbenchService(packageRoot), library))
+  disposers.push(registerWorkbenchRpc(ctx as never, new WorkbenchService(packageRoot), library, reports))
 
   return () => {
     for (const dispose of disposers) {

@@ -1,12 +1,13 @@
-/** 投研工作台主面板：策略库 / 因子库 / 选股库三个 tab + 会话桥任务入口。
+/** 投研工作台主面板：策略库 / 因子库 / 选股库 / 报告库四个 tab + 会话桥任务入口。
  * 工作台是「dsh agent 能力」的作业界面：库内容由 agent 会话经
- * strategy_* / factor_* / selection_* 工具登记（面板只读），「新建研究任务 /
- * 重跑本版本」把预填 prompt 投递到会话（submit，剪贴板降级），形成
- * KStock 同款闭环：agent 入库 → 面板查看时间线/运行对比 → 一键重跑迭代。 */
+ * strategy_* / factor_* / selection_* / report_* 工具登记归档（面板只读），
+ * 「新建研究任务 / 重跑本版本」把预填 prompt 投递到会话（submit，剪贴板
+ * 降级），形成 KStock 同款闭环：agent 入库 → 面板查看时间线/运行对比/
+ * 报告看板 → 一键重跑迭代。 */
 
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import type { LibraryTab, LibraryListState, LibraryDetailView, Translate, WorkbenchRuntime } from './runtime.ts'
-import { LIBRARY_TABS } from './runtime.ts'
+import type { LibraryTab, WorkbenchTab, LibraryListState, ReportListState, LibraryDetailView, Translate, WorkbenchRuntime } from './runtime.ts'
+import { LIBRARY_TABS, WORKBENCH_TABS } from './runtime.ts'
 import type { PanelState } from './runtime.ts'
 import type { ConversationBridge } from './bridge.ts'
 import { RunCompare } from './RunCompare.tsx'
@@ -18,10 +19,11 @@ export interface WorkbenchViewProps {
   readonly bridge: ConversationBridge
 }
 
-const TAB_LABEL: Record<LibraryTab, string> = {
+const TAB_LABEL: Record<WorkbenchTab, string> = {
   strategies: 'tabStrategies',
   factors: 'tabFactors',
   selections: 'tabSelections',
+  reports: 'tabReports',
 }
 
 const TOOL_PREFIX: Record<LibraryTab, string> = {
@@ -42,15 +44,22 @@ function num(value: unknown): string {
   return typeof value === 'number' ? String(value) : '—'
 }
 
+function isLibraryTab(tab: WorkbenchTab): tab is LibraryTab {
+  return (LIBRARY_TABS as readonly string[]).includes(tab)
+}
+
 export function WorkbenchView(props: WorkbenchViewProps): React.ReactElement {
   const { t, runtime, bridge } = props
   const state = usePanelState(runtime)
-  const [tab, setTab] = useState<LibraryTab>('strategies')
+  const [tab, setTab] = useState<WorkbenchTab>('strategies')
   const [deliverNote, setDeliverNote] = useState<string | undefined>(undefined)
 
   useEffect(() => { void runtime.refresh() }, [runtime])
-  useEffect(() => { void runtime.loadLibrary(tab) }, [runtime, tab])
-  useEffect(() => () => { runtime.closeDetail() }, [runtime])
+  useEffect(() => {
+    if (tab === 'reports') void runtime.loadReports()
+    else void runtime.loadLibrary(tab)
+  }, [runtime, tab])
+  useEffect(() => () => { runtime.closeDetail(); runtime.closeReport() }, [runtime])
 
   if (state.phase === 'error' && state.status === undefined) {
     return (
@@ -65,8 +74,12 @@ export function WorkbenchView(props: WorkbenchViewProps): React.ReactElement {
   }
 
   const libraries = state.libraries
-  const list: LibraryListState = libraries?.[tab] ?? { loaded: false, items: [] }
-  const detail = state.detail?.kind === tab ? state.detail.data : undefined
+  const reportList: ReportListState = state.reports ?? { loaded: false, items: [] }
+  const reportDetail = state.reportDetail?.data
+  const list: LibraryListState = isLibraryTab(tab)
+    ? (libraries?.[tab] ?? { loaded: false, items: [] })
+    : { loaded: false, items: [] }
+  const detail = state.detail?.kind === tab && isLibraryTab(tab) ? state.detail.data : undefined
 
   const deliver = (text: string): void => {
     void bridge.send(text).then((result) => {
@@ -83,19 +96,23 @@ export function WorkbenchView(props: WorkbenchViewProps): React.ReactElement {
           <p className='kss-subtitle'>{t('subtitle')}</p>
         </div>
         <div className='kss-badges'>
-          <button type='button' className='kss-btn' onClick={() => { void runtime.refresh(); void runtime.loadLibrary(tab) }}>
+          <button type='button' className='kss-btn' onClick={() => {
+            void runtime.refresh()
+            if (tab === 'reports') void runtime.loadReports()
+            else void runtime.loadLibrary(tab)
+          }}>
             {state.phase === 'loading' ? t('refreshing') : t('refresh')}
           </button>
         </div>
       </header>
 
       <div className='kss-tabs'>
-        {LIBRARY_TABS.map((kind) => (
+        {WORKBENCH_TABS.map((kind) => (
           <button
             key={kind}
             type='button'
             className={`kss-tab ${tab === kind ? 'is-active' : ''}`}
-            onClick={() => { runtime.closeDetail(); setTab(kind) }}
+            onClick={() => { runtime.closeDetail(); runtime.closeReport(); setTab(kind) }}
           >
             {t(TAB_LABEL[kind])}
           </button>
@@ -111,7 +128,11 @@ export function WorkbenchView(props: WorkbenchViewProps): React.ReactElement {
       </div>
       {deliverNote !== undefined && <p className='kss-feedback is-warn'>{deliverNote}</p>}
 
-      {detail === undefined ? (
+      {tab === 'reports' ? (
+        reportDetail !== undefined
+          ? <ReportDetailViewPane t={t} runtime={runtime} detail={reportDetail} />
+          : <ReportListTab t={t} runtime={runtime} list={reportList} />
+      ) : detail === undefined ? (
         <LibraryListTab t={t} runtime={runtime} tab={tab} list={list} />
       ) : (
         <LibraryDetailViewPane
@@ -297,4 +318,99 @@ function LibraryDetailViewPane(props: {
 
 function metricsHeaderLabel(tab: LibraryTab): string {
   return tab === 'strategies' ? '收益/夏普' : tab === 'factors' ? 'IC/IR' : '命中'
+}
+
+/* ── 报告库（第四 tab，只读）：列表 + 内嵌 HTML 看板预览 ─────────────────── */
+
+function formatBytes(bytes: unknown): string {
+  if (typeof bytes !== 'number' || !Number.isFinite(bytes)) return '—'
+  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  if (bytes >= 1024) return `${(bytes / 1024).toFixed(0)} KB`
+  return `${bytes} B`
+}
+
+function ReportListTab(props: {
+  t: Translate
+  runtime: WorkbenchRuntime
+  list: ReportListState
+}): React.ReactElement {
+  const { t, runtime, list } = props
+  if (!list.loaded) return <div className='kss-state'>{t('refreshing')}</div>
+  if (list.items.length === 0) return <p className='kss-card-hint'>{t('emptyReports')}</p>
+  return (
+    <div className='kss-grid'>
+      {list.items.map((item) => (
+        <article key={str(item['report_id'])} className='kss-skill'>
+          <div className='kss-skill-head'>
+            <span className='kss-skill-name'>{str(item['title'])}</span>
+            <button
+              type='button'
+              className='kss-skill-copy'
+              onClick={() => { void runtime.openReport(str(item['report_id'])) }}
+            >
+              {t('openDetail')}
+            </button>
+          </div>
+          <p className='kss-skill-desc'>
+            {str(item['symbol']) !== '' ? `${str(item['symbol'])} · ` : ''}{str(item['report_type'])}
+            {str(item['coverage_status']) === 'partial' ? ' · 数据部分覆盖' : ''}
+          </p>
+          <div className='kss-skill-meta'>
+            {str(item['risk_level']) !== '' && (
+              <span className={`kss-badge ${str(item['risk_level']) === '高' ? 'is-miss' : 'is-ok'}`}>
+                {t('reportRisk')} {str(item['risk_level'])}
+              </span>
+            )}
+            <span className='kss-field-hint'>{formatBytes(item['size_bytes'])}</span>
+            <span className='kss-field-hint'>{str(item['updated_at']).slice(0, 16).replace('T', ' ')}</span>
+          </div>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+function ReportDetailViewPane(props: {
+  t: Translate
+  runtime: WorkbenchRuntime
+  detail: Record<string, unknown>
+}): React.ReactElement {
+  const { t, runtime, detail } = props
+  const content = str(detail['content'])
+  const openInNewWindow = (): void => {
+    try {
+      const url = URL.createObjectURL(new Blob([content], { type: 'text/html' }))
+      window.open(url, '_blank', 'noopener')
+    } catch {
+      // 弹窗被宿主拦截时保留内嵌预览
+    }
+  }
+  return (
+    <section className='kss-card'>
+      <div className='kss-skill-head'>
+        <button type='button' className='kss-btn' onClick={() => { runtime.closeReport() }}>{t('backToList')}</button>
+        <span className='kss-skill-name'>{str(detail['title'])}</span>
+        {str(detail['symbol']) !== '' && <span className='kss-badge'>{str(detail['symbol'])}</span>}
+        <span className='kss-field-hint'>{formatBytes(detail['size_bytes'])}</span>
+        <span className='kss-tabs-spacer' />
+        <button type='button' className='kss-btn is-primary' onClick={openInNewWindow}>{t('reportOpenNew')}</button>
+      </div>
+      <p className='kss-card-hint'>
+        {str(detail['report_type'])} · {str(detail['generated_at']).slice(0, 16).replace('T', ' ')}
+        {str(detail['period_start']) !== '' ? ` · ${str(detail['period_start'])} ~ ${str(detail['period_end'])}` : ''}
+        {str(detail['risk_level']) !== '' ? ` · ${t('reportRisk')} ${str(detail['risk_level'])}` : ''}
+      </p>
+      <h3 className='kss-group-title'>{t('reportPreview')}</h3>
+      {content === '' ? (
+        <p className='kss-card-hint'>{t('reportNoContent')}</p>
+      ) : (
+        <iframe
+          className='kss-report-frame'
+          title={str(detail['title']) || t('reportPreview')}
+          srcDoc={content}
+          sandbox=''
+        />
+      )}
+    </section>
+  )
 }

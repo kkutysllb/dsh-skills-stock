@@ -1,15 +1,17 @@
 /** RPC runtime for the 投研工作台 panel: one bounded snapshot state source
  * plus mutation helpers that refresh on completion. Immutable snapshot +
  * listener set — the view wraps it in React state via useSyncExternalStore.
- * 数据面：凭据状态 + 技能目录（设置页）+ 三库列表/详情（工作台，只读——
- * 建库与登记只由 agent 工具完成，KStock 同款纪律）。 */
+ * 数据面：凭据状态 + 技能目录（设置页）+ 三库列表/详情 + 报告库（工作台，
+ * 只读——建库与归档只由 agent 工具完成，KStock 同款纪律）。 */
 
 import { unwrapRpcResult, type ClientRpc, type SaveSecretsResult, type SkillsCatalog, type WorkbenchStatus } from './protocol.ts'
 
 export const RPC_CHANNEL = '/dsh-skills-stock'
 
 export type LibraryTab = 'strategies' | 'factors' | 'selections'
+export type WorkbenchTab = LibraryTab | 'reports'
 export const LIBRARY_TABS: readonly LibraryTab[] = ['strategies', 'factors', 'selections']
+export const WORKBENCH_TABS: readonly WorkbenchTab[] = ['strategies', 'factors', 'selections', 'reports']
 
 /** 绑定后的翻译函数（locale.bind 产物；fallback 见 client/index.tsx）。 */
 export type Translate = (key: string, params?: Record<string, unknown>) => string
@@ -27,6 +29,11 @@ export interface LibraryItemView extends Record<string, unknown> {
 export interface LibraryListState {
   readonly loaded: boolean
   readonly items: readonly LibraryItemView[]
+}
+
+export interface ReportListState {
+  readonly loaded: boolean
+  readonly items: readonly Record<string, unknown>[]
 }
 
 export interface LibraryDetailView extends Record<string, unknown> {
@@ -50,6 +57,9 @@ export interface PanelState {
   readonly libraries?: Readonly<Record<LibraryTab, LibraryListState>>
   readonly detail?: { readonly kind: LibraryTab; readonly data: LibraryDetailView } | undefined
   readonly detailLoading?: boolean | undefined
+  readonly reports?: ReportListState
+  readonly reportDetail?: { readonly data: Record<string, unknown> } | undefined
+  readonly reportLoading?: boolean | undefined
 }
 
 export interface WorkbenchRuntime {
@@ -63,6 +73,10 @@ export interface WorkbenchRuntime {
   closeDetail(): void
   /** 运行对比：按 run_ids（2-4 个）拉取完整运行归档（含 equity/ic_series 曲线）。 */
   loadRuns(kind: LibraryTab, objectId: string, runIds: readonly string[]): Promise<Record<string, unknown>[]>
+  /** 报告库（第四 tab，只读）：列表 + 按 id 拉取 meta 与 HTML 全文。 */
+  loadReports(): Promise<void>
+  openReport(reportId: string): Promise<void>
+  closeReport(): void
   saveSecrets(input: { tushareToken?: string; iwencaiKey?: string }): Promise<SaveSecretsResult>
   clearFeedback(): void
 }
@@ -172,6 +186,30 @@ export function createWorkbenchRuntime(deps: WorkbenchRuntimeDeps): WorkbenchRun
         await deps.rpc.call(RPC_CHANNEL, 'library_runs', { kind, object_id: objectId, run_ids: [...runIds] }),
       )
       return value.runs
+    },
+    async loadReports() {
+      try {
+        const items = unwrapRpcResult<{ items: Record<string, unknown>[] }>(
+          await deps.rpc.call(RPC_CHANNEL, 'reports_list', {}),
+        ).items
+        patch({ reports: { loaded: true, items } })
+      } catch (error) {
+        patch({ reports: { loaded: true, items: [] }, error: error instanceof Error ? error.message : String(error) })
+      }
+    },
+    async openReport(reportId) {
+      patch({ reportLoading: true })
+      try {
+        const data = unwrapRpcResult<Record<string, unknown>>(
+          await deps.rpc.call(RPC_CHANNEL, 'reports_get', { report_id: reportId, content: true }),
+        )
+        patch({ reportDetail: { data }, reportLoading: false })
+      } catch (error) {
+        patch({ reportLoading: false, error: error instanceof Error ? error.message : String(error) })
+      }
+    },
+    closeReport() {
+      patch({ reportDetail: undefined })
     },
     async saveSecrets(input) {
       patch({ saving: true, saveError: undefined, savedKeys: undefined })

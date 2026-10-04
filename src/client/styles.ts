@@ -78,6 +78,7 @@ const CSS = `
 .kss-groups{display:flex;flex-direction:column;gap:14px}
 .kss-group-title{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--kss-fg-secondary);letter-spacing:.3px}
 .kss-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.kss-report-frame{width:100%;min-height:560px;height:64vh;border:1px solid var(--kss-border);border-radius:10px;background:var(--kss-layer);display:block}
 .kss-skill{display:flex;flex-direction:column;gap:6px;border:1px solid var(--kss-border);border-radius:10px;padding:10px 12px;background:var(--kss-layer-3);transition:border-color .15s ease}
 .kss-skill:hover{border-color:var(--kss-border-strong)}
 .kss-skill-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
