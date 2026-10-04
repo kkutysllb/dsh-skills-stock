@@ -37,6 +37,13 @@ git clone git@github.com:kkutysllb/dsh-skills-stock.git
 dsh plugin --profile web add ./dsh-skills-stock
 ```
 
+> **数据源配置（必读）**：多数分析/数据技能需要 **Tushare Token**（tushare.pro
+> 个人主页获取）与**同花顺问财 API Key**（问财开放平台控制台获取）——装后在
+> 宿主设置页「**数据源**」填入（只写本机 `<数据根>/secrets.env`，0600，不上传）；
+> 未配置时相关技能会明确报缺密钥而非编造数据。纯本地计算的技能
+> （options-payoff / options-volatility / chart-visualization 及全部方法论章节）
+> 与 akshare 兜底路径无需密钥。
+
 安装后重启 dsh 生效：
 
 - 41 个技能注册为 runtime skill（rank 250，项目级 `.dsh/skills` 同名技能可
